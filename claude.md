@@ -23,6 +23,7 @@ Backend is a Go API (`sugar-cane-service`) served at `API_URL` / `NEXT_PUBLIC_AP
 - Feature work lives on branches cut from `main` or a `release/*` branch
 - Releases are cut by tagging (`git tag vX.Y.Z`)
 - **Always ask before creating a commit or PR** — never commit or push autonomously
+- **Exception (multi-agent coordinator):** in the worktree workflow documented in `TEAM.md`, the coordinator session may run `git commit`, `git merge`, `git rebase`, and `git push` on behalf of the user **after** receiving explicit per-step approval (e.g. an `AskUserQuestion` response of the form "approve as-is", "go ahead", or "confirm merge"). Approval is scoped to the single operation being proposed; a new operation requires a new approval.
 
 ## Commands
 
