@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 export default function HomePage() {
-  const byPopularity = [...MOCK_GAMES].sort((a, b) => b.likeCount - a.likeCount);
+  const byPopularity = [...MOCK_GAMES].sort((a, b) => b.like_count - a.like_count);
   const heroGame = byPopularity[0];
   const popularGames = byPopularity.slice(1);
 

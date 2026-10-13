@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { ApiError, browserApi } from "@/lib/api";
 import type { Game } from "@/types/api";
 
 interface HeroCardProps {
@@ -9,72 +10,91 @@ interface HeroCardProps {
 }
 
 export default function HeroCard({ game }: HeroCardProps) {
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(game.likeCount);
-  const [saved, setSaved] = useState(false);
+  const [liked, setLiked] = useState(Boolean(game.liked));
+  const [likeCount, setLikeCount] = useState(game.like_count);
+  const [saved, setSaved] = useState(Boolean(game.in_my_list));
+  const [busy, setBusy] = useState(false);
+
+  const headlineTags = game.tags.slice(0, 3);
 
   async function toggleLike() {
-    const res = await fetch(`/api/games/${game.slug}/like`, { method: "POST" });
-    if (res.ok) {
-      const data = await res.json() as { liked: boolean; likeCount: number };
-      setLiked(data.liked);
-      setLikeCount(data.likeCount);
+    if (busy) return;
+    setBusy(true);
+    const next = !liked;
+    setLiked(next);
+    setLikeCount((c) => c + (next ? 1 : -1));
+    try {
+      if (next) await browserApi.likeGame(game.id);
+      else await browserApi.unlikeGame(game.id);
+    } catch (err) {
+      setLiked(!next);
+      setLikeCount((c) => c + (next ? -1 : 1));
+      if (err instanceof ApiError && err.status === 401) {
+        window.location.href = "/login";
+      }
+    } finally {
+      setBusy(false);
     }
   }
 
   async function toggleSave() {
-    const res = await fetch(`/api/games/${game.slug}/save`, { method: "POST" });
-    if (res.ok) {
-      const data = await res.json() as { saved: boolean };
-      setSaved(data.saved);
+    if (busy) return;
+    setBusy(true);
+    const next = !saved;
+    setSaved(next);
+    try {
+      if (next) await browserApi.addToMyList(game.id);
+      else await browserApi.removeFromMyList(game.id);
+    } catch (err) {
+      setSaved(!next);
+      if (err instanceof ApiError && err.status === 401) {
+        window.location.href = "/login";
+      }
+    } finally {
+      setBusy(false);
     }
   }
 
   return (
     <div className="relative rounded-3xl overflow-hidden min-h-110 flex flex-col justify-end p-8 sm:p-12 bg-hero-bg">
-      {/* Decorative circles — top-right corner */}
       <div className="absolute -top-20 -right-20 size-96 rounded-full bg-hero-circle pointer-events-none" />
       <div className="absolute top-8 right-8 size-64 rounded-full border-4 border-hero-ring pointer-events-none" />
       <div className="absolute top-24 right-24 size-28 rounded-2xl rotate-12 bg-hero-square pointer-events-none" />
 
-      {/* Content */}
       <div className="relative flex flex-col gap-5 max-w-xl">
-        {/* Badge */}
         <span className="inline-flex items-center self-start bg-accent text-text text-xs font-bold uppercase tracking-widest rounded-full px-3.5 py-1.5">
-          #1 Most popular this week
+          {game.badge ?? "#1 Most popular this week"}
         </span>
 
-        {/* Title */}
         <h1 className="font-display font-extrabold text-5xl sm:text-6xl lg:text-7xl leading-none tracking-[-0.03em] text-text">
           {game.name}
         </h1>
 
-        {/* Genre tags */}
-        <div className="flex flex-wrap gap-2">
-          {game.genre.map((g) => (
-            <span key={g} className="bg-white text-text text-sm font-bold rounded-full px-3.5 py-1">
-              {g}
-            </span>
-          ))}
-        </div>
+        {headlineTags.length > 0 && (
+          <div className="flex flex-wrap gap-2">
+            {headlineTags.map((t) => (
+              <span key={t} className="bg-white text-text text-sm font-bold rounded-full px-3.5 py-1">
+                {t}
+              </span>
+            ))}
+          </div>
+        )}
 
-        {/* Pitch */}
-        <p className="text-lg leading-snug max-w-lg text-hero-text">
-          {game.pitch}
-        </p>
+        <p className="text-lg leading-snug max-w-lg text-hero-text">{game.pitch}</p>
 
-        {/* Actions */}
         <div className="flex flex-wrap items-center gap-3 mt-1">
-          <a
-            href={game.link}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="h-13 px-6 rounded-full bg-accent text-text font-bold text-nav inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
-          >
-            <PlayIcon className="size-4.5" />
-            Play now
-            <ExternalIcon className="size-3.5 opacity-60" />
-          </a>
+          {game.link_web && (
+            <a
+              href={game.link_web}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="h-13 px-6 rounded-full bg-accent text-text font-bold text-nav inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
+            >
+              <PlayIcon className="size-4.5" />
+              Play now
+              <ExternalIcon className="size-3.5 opacity-60" />
+            </a>
+          )}
 
           <Link
             href={`/games/${game.slug}`}
@@ -86,8 +106,10 @@ export default function HeroCard({ game }: HeroCardProps) {
           <button
             type="button"
             onClick={toggleSave}
+            disabled={busy}
             aria-label={saved ? "Remove from list" : "Save to list"}
-            className={`size-13 rounded-full inline-flex items-center justify-center border transition-colors cursor-pointer ${
+            aria-pressed={saved}
+            className={`size-13 rounded-full inline-flex items-center justify-center border transition-colors cursor-pointer disabled:cursor-not-allowed ${
               saved
                 ? "bg-accent/10 border-accent"
                 : "bg-white border-border hover:bg-surface"
@@ -99,8 +121,10 @@ export default function HeroCard({ game }: HeroCardProps) {
           <button
             type="button"
             onClick={toggleLike}
+            disabled={busy}
             aria-label={liked ? "Unlike" : "Like"}
-            className={`h-13 px-5 rounded-full inline-flex items-center gap-2 text-nav font-semibold border transition-colors cursor-pointer ${
+            aria-pressed={liked}
+            className={`h-13 px-5 rounded-full inline-flex items-center gap-2 text-nav font-semibold border transition-colors cursor-pointer disabled:cursor-not-allowed ${
               liked
                 ? "bg-accent/10 border-accent text-text"
                 : "bg-white border-border text-text hover:bg-surface"

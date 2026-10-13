@@ -148,16 +148,16 @@ export default function Header() {
                   aria-label="Account menu"
                   className="size-11 rounded-full overflow-hidden border border-border-strong bg-surface flex items-center justify-center cursor-pointer hover:brightness-95 transition"
                 >
-                  {user.photoUrl ? (
+                  {user.photo_url ? (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
-                      src={user.photoUrl}
-                      alt={user.displayName}
+                      src={user.photo_url}
+                      alt={user.display_name}
                       className="w-full h-full object-cover"
                     />
                   ) : (
                     <span className="font-bold text-text">
-                      {user.displayName.charAt(0).toUpperCase()}
+                      {user.display_name.charAt(0).toUpperCase()}
                     </span>
                   )}
                 </button>
@@ -166,7 +166,7 @@ export default function Header() {
                   <div className="absolute right-0 top-12 z-30 w-56 bg-bg border border-border rounded-2xl shadow-xl p-2">
                     <div className="px-3 py-2 border-b border-border">
                       <div className="text-sm font-bold text-text truncate">
-                        {user.displayName}
+                        {user.display_name}
                       </div>
                       <div className="text-xs text-muted truncate">{user.email}</div>
                     </div>

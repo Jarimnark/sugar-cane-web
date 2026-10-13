@@ -1,128 +1,101 @@
 export interface User {
   id: string;
-  displayName: string;
-  photoUrl?: string;
-  bio?: string;
   email: string;
+  display_name: string;
+  bio?: string;
+  photo_url?: string;
+  email_verified: boolean;
+  created_at: string;
 }
 
 export interface Game {
   id: string;
+  owner_id: string;
   slug: string;
   name: string;
-  link: string;
-  domain: string;
   dev: string;
-  genre: string[];
-  platforms: string[];
-  players: string;
-  tags: string[];
   pitch: string;
   description: string;
+  link_web?: string;
+  link_android?: string;
+  link_ios?: string;
   bg: string;
-  likeCount: number;
-  liked?: boolean;
-  inMyList?: boolean;
+  players: string;
+  tags: string[];
+  status: "draft" | "published";
+  like_count: number;
+  visit_count: number;
   badge?: string;
+  created_at: string;
+  liked?: boolean;
+  in_my_list?: boolean;
 }
 
-export interface Category {
-  label: string;
+export interface OptionItem {
+  id: string;
+  name: string;
   slug: string;
-  count: number;
 }
 
-export interface Platform {
-  label: string;
+export interface CategoryItem {
+  id: string;
+  name: string;
   slug: string;
-  count: number;
+  game_count: number;
 }
 
 export interface MasterOption {
-  genres: Category[];
-  platforms: Platform[];
-  players: string[];
-  tags: string[];
-}
-
-export interface MyListEntry {
-  game: Game;
-  addedAt: string;
-  note?: string;
-}
-
-export interface GameListFilter {
-  q?: string;
-  genre?: string | string[];
-  platform?: string | string[];
-  tags?: string[];
-  sort?: "popular" | "newest" | "az";
-  offset?: number;
-  limit?: number;
-}
-
-export interface GameListResponse {
-  items: Game[];
-  total: number;
-  offset: number;
-  limit: number;
-}
-
-export type GameListParams = GameListFilter;
-
-export interface HomeResponse {
-  hero: Game | null;
-  mostPopular: Game[];
-  newThisWeek: Game[];
-}
-
-export interface SuggestResponse {
-  items: Array<Pick<Game, "id" | "slug" | "name" | "bg">>;
+  genres: OptionItem[];
+  platforms: OptionItem[];
 }
 
 export interface CategoryDetailResponse {
-  genres: Category[];
-  platforms: Platform[];
+  genres: CategoryItem[];
+  platforms: CategoryItem[];
 }
 
-export interface GameEventPayload {
-  type: "click" | "play" | "impression";
-  source?: string;
+export interface GameListFilter {
+  sort?: string;
+  genre_id?: string;
+  platform_id?: string;
+  page?: number;
+  limit?: number;
 }
 
-export interface MyListResponse {
-  items: MyListEntry[];
+export interface HomeResponse {
+  trending: Game[];
+  popular: Game[];
+  new: Game[];
 }
 
-export interface MyGame extends Game {
-  updatedAt: string;
-  published: boolean;
-}
+export type SuggestResponse = string[];
 
-export interface MyGameListResponse {
-  items: MyGame[];
-}
+export type GameEventType = "click" | "play" | "impression";
+
+export type MyGame = Game;
 
 export interface CreateGamePayload {
+  id?: string;
+  slug: string;
   name: string;
-  link: string;
-  pitch?: string;
-  description?: string;
-  genre?: string[];
-  platforms?: string[];
-  players?: string;
+  dev: string;
+  pitch: string;
+  description: string;
+  link_web?: string;
+  link_android?: string;
+  link_ios?: string;
+  bg: string;
+  players: string;
   tags?: string[];
-  bg?: string;
 }
 
 export interface UpdateProfilePayload {
-  displayName?: string;
+  display_name: string;
   bio?: string;
-  photoUrl?: string;
 }
 
 export interface CreateProfilePayload {
-  displayName: string;
+  display_name: string;
   bio?: string;
 }
 

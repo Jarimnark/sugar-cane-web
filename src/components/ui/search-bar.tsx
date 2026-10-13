@@ -1,9 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { browserApi } from "@/lib/api";
-import type { SuggestResponse } from "@/types/api";
 
 interface SearchBarProps {
   placeholder?: string;
@@ -18,9 +16,10 @@ export default function SearchBar({
 }: SearchBarProps) {
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState<SuggestResponse["items"]>([]);
+  const [items, setItems] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const formRef = useRef<HTMLFormElement>(null);
 
   useEffect(() => {
     function onOutside(e: MouseEvent) {
@@ -45,7 +44,7 @@ export default function SearchBar({
       setLoading(true);
       try {
         const data = await browserApi.suggestGames(term, controller.signal);
-        setItems(data.items);
+        setItems(data);
         setOpen(true);
       } catch (err) {
         if ((err as Error).name !== "AbortError") {
@@ -62,9 +61,16 @@ export default function SearchBar({
     };
   }, [q]);
 
+  function pickSuggestion(name: string) {
+    setQ(name);
+    setOpen(false);
+    requestAnimationFrame(() => formRef.current?.requestSubmit());
+  }
+
   return (
     <div ref={wrapRef} className={`relative ${className}`}>
       <form
+        ref={formRef}
         role="search"
         action={action}
         className="flex items-center gap-2.5 bg-surface border border-border rounded-full pl-4 pr-1.5 h-11"
@@ -91,20 +97,16 @@ export default function SearchBar({
           {loading && items.length === 0 && (
             <div className="px-4 py-2 text-sm text-muted">Searching…</div>
           )}
-          {items.map((item) => (
-            <Link
-              key={item.id}
-              href={`/games/${item.slug}`}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 px-3 py-2 mx-1 rounded-xl hover:bg-surface transition-colors"
+          {items.map((name) => (
+            <button
+              key={name}
+              type="button"
+              onClick={() => pickSuggestion(name)}
+              className="w-full text-left flex items-center gap-3 px-3 py-2 mx-1 rounded-xl hover:bg-surface transition-colors cursor-pointer"
             >
-              <span
-                aria-hidden="true"
-                className="size-9 rounded-lg shrink-0"
-                style={{ background: item.bg }}
-              />
-              <span className="text-sm font-semibold text-text truncate">{item.name}</span>
-            </Link>
+              <SearchIcon className="size-4 text-muted shrink-0" />
+              <span className="text-sm font-semibold text-text truncate">{name}</span>
+            </button>
           ))}
         </div>
       )}

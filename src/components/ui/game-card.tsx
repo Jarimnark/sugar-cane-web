@@ -16,8 +16,8 @@ interface GameCardProps {
 
 export default function GameCard({ game, variant = "default", showSave }: GameCardProps) {
   const [liked, setLiked] = useState(Boolean(game.liked));
-  const [likeCount, setLikeCount] = useState(game.likeCount);
-  const [saved, setSaved] = useState(Boolean(game.inMyList));
+  const [likeCount, setLikeCount] = useState(game.like_count);
+  const [saved, setSaved] = useState(Boolean(game.in_my_list));
   const [busy, setBusy] = useState(false);
   const showSaveButton = showSave ?? true;
   const isCompact = variant === "compact";
@@ -61,7 +61,7 @@ export default function GameCard({ game, variant = "default", showSave }: GameCa
   }
 
   function trackClick() {
-    void browserApi.trackGameEvent(game.id, { type: "click", source: "card" }).catch(() => {});
+    void browserApi.trackGameEvent(game.id, "click").catch(() => {});
   }
 
   const artHeight = isCompact ? "h-28" : "h-36";
@@ -97,11 +97,9 @@ export default function GameCard({ game, variant = "default", showSave }: GameCa
         {!isCompact && <p className="text-xs text-muted line-clamp-2">{game.pitch}</p>}
 
         <div className="flex flex-wrap gap-1 mt-auto pt-2">
-          {game.genre.map((g) => (
-            <Badge key={g} label={g} variant="genre" />
+          {game.tags.map((t) => (
+            <Badge key={t} label={t} variant="genre" />
           ))}
-          {!isCompact &&
-            game.platforms.map((p) => <Badge key={p} label={p} variant="platform" />)}
         </div>
 
         <div className="flex items-center gap-2 mt-1">

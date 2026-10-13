@@ -1,141 +1,172 @@
-import type { Category, Game, Platform, User } from "@/types/api";
+import type { Game, User } from "@/types/api";
+
+export interface MockCategory {
+  label: string;
+  slug: string;
+  count: number;
+}
+
+export interface MockPlatform {
+  label: string;
+  slug: string;
+  count: number;
+}
+
+const OWNER_ID = "00000000-0000-0000-0000-000000000001";
+const CREATED_AT = "2026-01-01T00:00:00Z";
 
 export const MOCK_GAMES: Game[] = [
   {
     id: "1",
+    owner_id: OWNER_ID,
     slug: "celeste-classic",
     name: "Celeste Classic",
-    link: "https://www.lexaloffle.com/bbs/?tid=2145",
-    domain: "lexaloffle.com",
+    link_web: "https://www.lexaloffle.com/bbs/?tid=2145",
     dev: "Maddy Thorson & Noel Berry",
-    genre: ["Platformer", "Puzzle"],
-    platforms: ["Browser"],
     players: "1",
-    tags: ["pixel", "hard", "indie"],
+    tags: ["Platformer", "Puzzle", "pixel"],
     pitch: "Climb a mountain. Discover yourself.",
-    description: "A tiny mountain-climbing platformer. Help Madeline survive her inner demons on her journey to the top of Celeste Mountain.",
+    description:
+      "A tiny mountain-climbing platformer. Help Madeline survive her inner demons on her journey to the top of Celeste Mountain.",
     bg: "#3d6b8a",
-    likeCount: 482,
+    like_count: 482,
+    visit_count: 0,
+    status: "published",
     badge: "Hot",
+    created_at: CREATED_AT,
   },
   {
     id: "2",
+    owner_id: OWNER_ID,
     slug: "2048",
     name: "2048",
-    link: "https://play2048.co",
-    domain: "play2048.co",
+    link_web: "https://play2048.co",
     dev: "Gabriele Cirulli",
-    genre: ["Puzzle", "Idle"],
-    platforms: ["Browser", "Mobile"],
     players: "1",
-    tags: ["numbers", "relaxing", "addictive"],
+    tags: ["Puzzle", "Idle", "numbers"],
     pitch: "Slide tiles, reach 2048.",
-    description: "Join the numbers and get to the 2048 tile. A deceptively simple puzzle that gets incredibly hard.",
+    description:
+      "Join the numbers and get to the 2048 tile. A deceptively simple puzzle that gets incredibly hard.",
     bg: "#b8a07a",
-    likeCount: 1204,
+    like_count: 1204,
+    visit_count: 0,
+    status: "published",
     badge: "Classic",
+    created_at: CREATED_AT,
   },
   {
     id: "3",
+    owner_id: OWNER_ID,
     slug: "slither-io",
     name: "Slither.io",
-    link: "https://slither.io",
-    domain: "slither.io",
+    link_web: "https://slither.io",
     dev: "Steve Howse",
-    genre: ["Multiplayer", "Arcade"],
-    platforms: ["Browser", "Mobile"],
     players: "multi",
-    tags: ["snake", "competitive", "casual"],
+    tags: ["Multiplayer", "Arcade", "competitive"],
     pitch: "Eat, grow, dominate.",
-    description: "Control a snake and eat glowing orbs to grow longer. Trap other players and eat their remains.",
+    description:
+      "Control a snake and eat glowing orbs to grow longer. Trap other players and eat their remains.",
     bg: "#2d7a3a",
-    likeCount: 876,
+    like_count: 876,
+    visit_count: 0,
+    status: "published",
+    created_at: CREATED_AT,
   },
   {
     id: "4",
+    owner_id: OWNER_ID,
     slug: "chess-com",
     name: "Chess.com",
-    link: "https://www.chess.com/play/online",
-    domain: "chess.com",
+    link_web: "https://www.chess.com/play/online",
     dev: "Chess.com",
-    genre: ["Strategy", "Multiplayer"],
-    platforms: ["Browser", "Mobile"],
     players: "2",
-    tags: ["classic", "competitive", "turn-based"],
+    tags: ["Strategy", "Multiplayer", "classic"],
     pitch: "The world's most popular chess platform.",
-    description: "Play chess online against players of all skill levels. Rated games, puzzles, and lessons.",
+    description:
+      "Play chess online against players of all skill levels. Rated games, puzzles, and lessons.",
     bg: "#6b7a3d",
-    likeCount: 2310,
+    like_count: 2310,
+    visit_count: 0,
+    status: "published",
     badge: "Popular",
+    created_at: CREATED_AT,
   },
   {
     id: "5",
+    owner_id: OWNER_ID,
     slug: "cookie-clicker",
     name: "Cookie Clicker",
-    link: "https://orteil.dashnet.org/cookieclicker/",
-    domain: "orteil.dashnet.org",
+    link_web: "https://orteil.dashnet.org/cookieclicker/",
     dev: "Orteil",
-    genre: ["Idle"],
-    platforms: ["Browser"],
     players: "1",
-    tags: ["clicker", "incremental", "relaxing"],
+    tags: ["Idle", "clicker", "incremental"],
     pitch: "Click the cookie. Build an empire.",
-    description: "An idle game where you bake cookies to rule the universe. Start with a single click and expand into an unstoppable cookie empire.",
+    description:
+      "An idle game where you bake cookies to rule the universe. Start with a single click and expand into an unstoppable cookie empire.",
     bg: "#8a5a2d",
-    likeCount: 643,
+    like_count: 643,
+    visit_count: 0,
+    status: "published",
+    created_at: CREATED_AT,
   },
   {
     id: "6",
+    owner_id: OWNER_ID,
     slug: "wordle",
     name: "Wordle",
-    link: "https://www.nytimes.com/games/wordle/index.html",
-    domain: "nytimes.com",
+    link_web: "https://www.nytimes.com/games/wordle/index.html",
     dev: "Josh Wardle / NYT",
-    genre: ["Puzzle"],
-    platforms: ["Browser", "Mobile"],
     players: "1",
-    tags: ["word", "daily", "social"],
+    tags: ["Puzzle", "word", "daily"],
     pitch: "One word. Six guesses. One chance a day.",
-    description: "Guess the five-letter word in six attempts. Share your result without spoilers.",
+    description:
+      "Guess the five-letter word in six attempts. Share your result without spoilers.",
     bg: "#4a7a4a",
-    likeCount: 3821,
+    like_count: 3821,
+    visit_count: 0,
+    status: "published",
     badge: "New",
+    created_at: CREATED_AT,
   },
   {
     id: "7",
+    owner_id: OWNER_ID,
     slug: "krunker-io",
     name: "Krunker.io",
-    link: "https://krunker.io",
-    domain: "krunker.io",
+    link_web: "https://krunker.io",
     dev: "Sidney de Vries",
-    genre: ["Action", "Multiplayer"],
-    platforms: ["Browser"],
     players: "multi",
-    tags: ["fps", "competitive", "fast-paced"],
+    tags: ["Action", "Multiplayer", "fps"],
     pitch: "Browser FPS that actually feels good.",
-    description: "A fast-paced first-person shooter playable in any browser. No download needed — just jump in and fight.",
+    description:
+      "A fast-paced first-person shooter playable in any browser. No download needed — just jump in and fight.",
     bg: "#5a3d7a",
-    likeCount: 1098,
+    like_count: 1098,
+    visit_count: 0,
+    status: "published",
+    created_at: CREATED_AT,
   },
   {
     id: "8",
+    owner_id: OWNER_ID,
     slug: "agar-io",
     name: "Agar.io",
-    link: "https://agar.io",
-    domain: "agar.io",
+    link_web: "https://agar.io",
     dev: "Miniclip",
-    genre: ["Multiplayer", "Arcade"],
-    platforms: ["Browser", "Mobile"],
     players: "multi",
-    tags: ["casual", "competitive", "simple"],
+    tags: ["Multiplayer", "Arcade", "casual"],
     pitch: "Eat smaller cells. Avoid bigger ones.",
-    description: "Control a cell and eat other players to grow. Avoid being eaten yourself. Simple rules, endless competition.",
+    description:
+      "Control a cell and eat other players to grow. Avoid being eaten yourself. Simple rules, endless competition.",
     bg: "#7a3d5a",
-    likeCount: 765,
+    like_count: 765,
+    visit_count: 0,
+    status: "published",
+    created_at: CREATED_AT,
   },
 ];
 
-export const MOCK_CATEGORIES: Category[] = [
+export const MOCK_CATEGORIES: MockCategory[] = [
   { label: "Puzzle", slug: "puzzle", count: 3 },
   { label: "Action", slug: "action", count: 1 },
   { label: "Strategy", slug: "strategy", count: 1 },
@@ -144,17 +175,19 @@ export const MOCK_CATEGORIES: Category[] = [
   { label: "Multiplayer", slug: "multiplayer", count: 4 },
 ];
 
-export const MOCK_PLATFORMS: Platform[] = [
+export const MOCK_PLATFORMS: MockPlatform[] = [
   { label: "Browser", slug: "browser", count: 8 },
   { label: "Mobile", slug: "mobile", count: 5 },
 ];
 
 export const MOCK_USER: User = {
-  id: "u1",
-  displayName: "Player One",
-  photoUrl: undefined,
+  id: "00000000-0000-0000-0000-000000000099",
+  display_name: "Player One",
+  photo_url: undefined,
   bio: "I play games in my browser.",
   email: "player@example.com",
+  email_verified: true,
+  created_at: CREATED_AT,
 };
 
 export const MOCK_USER_LIST_SLUGS = ["celeste-classic", "2048", "wordle"];

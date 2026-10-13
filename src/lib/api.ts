@@ -3,19 +3,18 @@ import type {
   CreateGamePayload,
   CreateProfilePayload,
   Game,
-  GameEventPayload,
+  GameEventType,
   GameListFilter,
-  GameListResponse,
   HomeResponse,
   MasterOption,
   MyGame,
-  MyGameListResponse,
-  MyListResponse,
   OAuthProvider,
   SuggestResponse,
   UpdateProfilePayload,
   User,
 } from "@/types/api";
+
+const API_PREFIX = "/api/v1";
 
 export class ApiError extends Error {
   constructor(
@@ -39,7 +38,9 @@ interface RequestOptions {
 }
 
 function buildUrl(base: string, path: string, query?: RequestOptions["query"]) {
-  const url = new URL(path.replace(/^\//, ""), base.endsWith("/") ? base : `${base}/`);
+  const trimmedBase = base.endsWith("/") ? base.slice(0, -1) : base;
+  const prefixed = `${trimmedBase}${API_PREFIX}${path.startsWith("/") ? path : `/${path}`}`;
+  const url = new URL(prefixed);
   if (query) {
     for (const [key, value] of Object.entries(query)) {
       if (value === undefined || value === null) continue;
@@ -53,7 +54,12 @@ function buildUrl(base: string, path: string, query?: RequestOptions["query"]) {
   return url.toString();
 }
 
-async function request<T>(baseUrl: string, path: string, options: RequestOptions, credentials: RequestCredentials | undefined) {
+async function request<T>(
+  baseUrl: string,
+  path: string,
+  options: RequestOptions,
+  credentials: RequestCredentials | undefined,
+) {
   const { method = "GET", query, body, cookie, cache, next, signal } = options;
   const url = buildUrl(baseUrl, path, query);
   const headers: Record<string, string> = {};
@@ -111,16 +117,16 @@ export const serverApi = {
   getSession: () => serverRequest<User>("/auth/me"),
   getHome: () => serverRequest<HomeResponse>("/home"),
   getMasterOptions: () => serverRequest<MasterOption>("/master-option"),
-  getCategoryDetail: () => serverRequest<CategoryDetailResponse>("/catagory-detail"),
+  getCategoryDetail: () => serverRequest<CategoryDetailResponse>("/category-detail"),
   listGames: (filter: GameListFilter) =>
-    serverRequest<GameListResponse>("/game/list", { method: "POST", body: filter }),
+    serverRequest<Game[]>("/game/list", { method: "POST", body: filter }),
   suggestGames: (q: string, signal?: AbortSignal) =>
     serverRequest<SuggestResponse>("/game/suggest", { query: { q }, signal }),
   getGame: (id: string) => serverRequest<Game>(`/game/${id}`),
-  getRelatedGames: (id: string) => serverRequest<GameListResponse>(`/game/${id}/related`),
-  getMyList: (sort?: "added" | "name") =>
-    serverRequest<MyListResponse>("/me/list", { query: { sort } }),
-  getMyGames: () => serverRequest<MyGameListResponse>("/me/game"),
+  getRelatedGames: (id: string) => serverRequest<Game[]>(`/game/${id}/related`),
+  getMyList: (sort?: string) =>
+    serverRequest<Game[]>("/me/list", { query: { sort } }),
+  getMyGames: () => serverRequest<MyGame[]>("/me/game"),
   getMyGame: (id: string) => serverRequest<MyGame>(`/me/game/${id}`),
 };
 
@@ -128,27 +134,28 @@ export const browserApi = {
   getSession: (signal?: AbortSignal) => browserRequest<User>("/auth/me", { signal }),
   logout: () => browserRequest<void>("/auth/logout", { method: "POST" }),
   startOAuth: (provider: OAuthProvider) => {
-    window.location.href = `${browserBaseUrl().replace(/\/$/, "")}/auth/${provider}/start`;
+    const base = browserBaseUrl().replace(/\/$/, "");
+    window.location.href = `${base}${API_PREFIX}/auth/${provider}/start`;
   },
 
   getHome: () => browserRequest<HomeResponse>("/home"),
   getMasterOptions: () => browserRequest<MasterOption>("/master-option"),
-  getCategoryDetail: () => browserRequest<CategoryDetailResponse>("/catagory-detail"),
+  getCategoryDetail: () => browserRequest<CategoryDetailResponse>("/category-detail"),
   listGames: (filter: GameListFilter) =>
-    browserRequest<GameListResponse>("/game/list", { method: "POST", body: filter }),
+    browserRequest<Game[]>("/game/list", { method: "POST", body: filter }),
   suggestGames: (q: string, signal?: AbortSignal) =>
     browserRequest<SuggestResponse>("/game/suggest", { query: { q }, signal }),
   getGame: (id: string) => browserRequest<Game>(`/game/${id}`),
-  getRelatedGames: (id: string) => browserRequest<GameListResponse>(`/game/${id}/related`),
+  getRelatedGames: (id: string) => browserRequest<Game[]>(`/game/${id}/related`),
 
-  trackGameEvent: (id: string, payload: GameEventPayload) =>
-    browserRequest<void>(`/game/${id}/event`, { method: "POST", body: payload }),
+  trackGameEvent: (id: string, type: GameEventType) =>
+    browserRequest<void>(`/game/${id}/event`, { method: "POST", query: { type } }),
 
   likeGame: (id: string) => browserRequest<void>(`/game/${id}/like`, { method: "PUT" }),
   unlikeGame: (id: string) => browserRequest<void>(`/game/${id}/like`, { method: "DELETE" }),
 
-  getMyList: (sort?: "added" | "name") =>
-    browserRequest<MyListResponse>("/me/list", { query: { sort } }),
+  getMyList: (sort?: string) =>
+    browserRequest<Game[]>("/me/list", { query: { sort } }),
   addToMyList: (id: string) => browserRequest<void>(`/me/list/${id}`, { method: "PUT" }),
   removeFromMyList: (id: string) =>
     browserRequest<void>(`/me/list/${id}`, { method: "DELETE" }),
@@ -163,12 +170,12 @@ export const browserApi = {
   unlinkConnection: (provider: OAuthProvider) =>
     browserRequest<void>(`/me/connection/${provider}`, { method: "DELETE" }),
 
-  getMyGames: () => browserRequest<MyGameListResponse>("/me/game"),
+  getMyGames: () => browserRequest<MyGame[]>("/me/game"),
   getMyGame: (id: string) => browserRequest<MyGame>(`/me/game/${id}`),
-  saveMyGame: (payload: CreateGamePayload & { id?: string }, publish = false) =>
+  saveMyGame: (payload: CreateGamePayload, publish = false) =>
     browserRequest<MyGame>("/me/game", {
       method: "POST",
-      query: { action: "update", publish },
+      query: { publish },
       body: payload,
     }),
   deleteMyGame: (id: string) =>
