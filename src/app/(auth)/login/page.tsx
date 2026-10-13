@@ -1,14 +1,16 @@
-import type { Metadata } from "next";
-import Link from "next/link";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Sign in",
-};
+import { browserApi } from "@/lib/api";
+import type { OAuthProvider } from "@/types/api";
+import Button from "@/components/ui/button";
 
 export default function LoginPage() {
+  const signIn = (provider: OAuthProvider) => () => {
+    browserApi.startOAuth(provider);
+  };
+
   return (
     <div className="w-full max-w-sm">
-      {/* Heading */}
       <div className="text-center mb-8">
         <h1 className="font-display font-extrabold text-3xl tracking-tight text-text">
           Sign in
@@ -16,80 +18,31 @@ export default function LoginPage() {
         <p className="text-muted mt-2 text-sm">Welcome back to SugarCane</p>
       </div>
 
-      {/* Social buttons */}
       <div className="flex flex-col gap-3">
-        <a
-          href="/api/auth/google"
-          className="h-11 rounded-xl border border-border bg-bg hover:bg-surface transition-colors flex items-center justify-center gap-3 text-sm font-semibold text-text"
+        <Button
+          variant="secondary"
+          size="md"
+          fullWidth
+          onClick={signIn("google")}
+          className="rounded-xl"
         >
           <GoogleIcon className="size-5 shrink-0" />
           Continue with Google
-        </a>
+        </Button>
 
-        <a
-          href="/api/auth/facebook"
-          className="h-11 rounded-xl bg-[#1877F2] hover:opacity-90 transition-opacity flex items-center justify-center gap-3 text-sm font-semibold text-white"
+        <button
+          type="button"
+          onClick={signIn("facebook")}
+          className="h-11 rounded-xl bg-[#1877F2] hover:opacity-90 transition-opacity flex items-center justify-center gap-2 text-nav font-semibold text-white cursor-pointer"
         >
           <FacebookIcon className="size-5 shrink-0" />
           Continue with Facebook
-        </a>
-      </div>
-
-      {/* Divider */}
-      <div className="flex items-center gap-3 my-6">
-        <div className="flex-1 h-px bg-border" />
-        <span className="text-xs font-semibold text-muted uppercase tracking-widest">or</span>
-        <div className="flex-1 h-px bg-border" />
-      </div>
-
-      {/* Email / password form */}
-      <form className="flex flex-col gap-4">
-        <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-sm font-semibold text-text">
-            Email
-          </label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            autoComplete="email"
-            required
-            className="h-11 px-4 rounded-xl border border-border bg-surface text-text text-sm outline-none focus:border-accent transition-colors"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-sm font-semibold text-text">
-              Password
-            </label>
-            <Link href="/forgot-password" className="text-xs text-muted hover:text-text transition-colors">
-              Forgot password?
-            </Link>
-          </div>
-          <input
-            id="password"
-            type="password"
-            name="password"
-            autoComplete="current-password"
-            required
-            className="h-11 px-4 rounded-xl border border-border bg-surface text-text text-sm outline-none focus:border-accent transition-colors"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="h-11 rounded-xl bg-accent text-text font-semibold text-sm mt-2 hover:opacity-90 transition-opacity cursor-pointer"
-        >
-          Sign in
         </button>
-      </form>
+      </div>
 
-      <p className="text-center text-sm text-muted mt-6">
-        Don&apos;t have an account?{" "}
-        <Link href="/register" className="text-text font-semibold hover:underline">
-          Sign up
-        </Link>
+      <p className="text-center text-xs text-muted mt-8 leading-relaxed">
+        By continuing, you agree to SugarCane&apos;s Terms of Service and
+        Privacy Policy.
       </p>
     </div>
   );
