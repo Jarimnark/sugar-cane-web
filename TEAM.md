@@ -15,10 +15,8 @@ Each agent works in its own worktree on its own feature branch. All branches are
 | `coffinfish` | `~/orca/workspaces/sugar-cane-web/coffinfish` | `feat/create-game-page` | Create/edit game (`src/app/(site)/games/`) | Add new game — 1440×2100 |
 | `melusine` | `~/orca/workspaces/sugar-cane-web/melusine` | `feat/my-list-page` | My list (`src/app/(site)/my-list/`) | My list — 1440×1200 |
 | `taniwha` | `~/orca/workspaces/sugar-cane-web/taniwha` | `feat/setting-page` | Settings (`src/app/(site)/settings/`) | Account settings — 1440×1300 |
-
-**Unassigned pages** (no owner yet — do not implement unless promoted):
-- Log in + first-time profile — belongs under `src/app/(auth)/`
-- Game page (detail view) — belongs under `src/app/(site)/games/[id]/`
+| `nautilus` | `~/orca/workspaces/sugar-cane-web/nautilus` | `feat/login-page` | Login + first-time profile (`src/app/(auth)/`) | Log in + first-time profile — 1440×1000 |
+| `anglerfish` | `~/orca/workspaces/sugar-cane-web/anglerfish` | `feat/game-detail-page` | Game detail (`src/app/(site)/games/[id]/`) | Game page — 1440×2700 |
 
 ---
 
@@ -179,6 +177,20 @@ If your page needs one of these before the coordinator has built it, follow the 
   - What you need from shared zones (if anything)
   - What you noticed that may affect siblings (new type you'd like to share, a UI pattern you expect others will want, an API endpoint behavior that surprised you)
 - Keep your reports under 300 words unless asked for more.
+
+---
+
+## Merge policy (hard rule)
+
+**Nothing merges without explicit human approval.** Not back to `main`, not between feature branches, not even a "trivial" fast-forward.
+
+Workflow for every feature branch:
+1. Agent finishes work and reports to the coordinator.
+2. Coordinator reviews the diff and summarizes it for the human.
+3. **Human confirms the merge** — explicitly, each time.
+4. Only then does the coordinator merge / rebase / push.
+
+This applies to the foundation pass too — the foundation branch does not land on `main` without human sign-off.
 
 ---
 
