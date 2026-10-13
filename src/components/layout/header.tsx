@@ -1,24 +1,43 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useRef, useEffect } from "react";
-import { MOCK_CATEGORIES, MOCK_PLATFORMS } from "@/lib/mock-data";
+import { useEffect, useRef, useState } from "react";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
+import SearchBar from "@/components/ui/search-bar";
+import { browserApi } from "@/lib/api";
+import { useSession } from "@/hooks/useSession";
+import { MOCK_CATEGORIES, MOCK_PLATFORMS } from "@/lib/mock-data";
 
 export default function Header() {
   const [catsOpen, setCatsOpen] = useState(false);
+  const [userOpen, setUserOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const catsRef = useRef<HTMLDivElement>(null);
+  const userRef = useRef<HTMLDivElement>(null);
+  const { user, refresh } = useSession();
 
   useEffect(() => {
     function onOutsideClick(e: MouseEvent) {
       if (catsRef.current && !catsRef.current.contains(e.target as Node)) {
         setCatsOpen(false);
       }
+      if (userRef.current && !userRef.current.contains(e.target as Node)) {
+        setUserOpen(false);
+      }
     }
     document.addEventListener("mousedown", onOutsideClick);
     return () => document.removeEventListener("mousedown", onOutsideClick);
   }, []);
+
+  async function onLogout() {
+    try {
+      await browserApi.logout();
+    } finally {
+      setUserOpen(false);
+      await refresh();
+      window.location.href = "/";
+    }
+  }
 
   const totalGames = MOCK_CATEGORIES.reduce((sum, c) => sum + c.count, 0);
 
@@ -26,8 +45,6 @@ export default function Header() {
     <>
       <header className="border-b border-border bg-bg sticky top-0 z-30">
         <div className="max-w-340 mx-auto px-4 sm:px-6 lg:px-10 py-3.5 flex items-center gap-x-7">
-
-          {/* Logo */}
           <Link
             href="/"
             aria-label="SugarCane home"
@@ -37,10 +54,10 @@ export default function Header() {
             <span className="font-display font-extrabold text-2xl tracking-tight">SugarCane</span>
           </Link>
 
-          {/* Desktop nav — hidden on mobile */}
-          <nav aria-label="Main" className="hidden lg:flex flex-wrap items-center gap-x-5.5 gap-y-1 font-semibold text-nav">
-
-            {/* Categories dropdown */}
+          <nav
+            aria-label="Main"
+            className="hidden lg:flex flex-wrap items-center gap-x-5.5 gap-y-1 font-semibold text-nav"
+          >
             <div className="relative" ref={catsRef}>
               <button
                 type="button"
@@ -108,23 +125,10 @@ export default function Header() {
             </Link>
           </nav>
 
-          {/* Desktop search — hidden on mobile */}
           <div className="hidden lg:block flex-1 max-w-100">
-            <form role="search" action="/browse" className="flex items-center gap-2.5 bg-surface border border-border rounded-full pl-4 pr-1.5 h-11">
-              <SearchIcon className="size-4.5 text-muted shrink-0" />
-              <label htmlFor="header-search" className="sr-only">Search games by name</label>
-              <input
-                id="header-search"
-                name="q"
-                type="search"
-                autoComplete="off"
-                placeholder="Search games"
-                className="flex-1 min-w-0 bg-transparent border-0 outline-none text-text text-nav placeholder:text-muted"
-              />
-            </form>
+            <SearchBar />
           </div>
 
-          {/* Desktop right — hidden on mobile */}
           <div className="hidden lg:flex items-center gap-3 ml-auto">
             <Link
               href="/my-list"
@@ -132,20 +136,67 @@ export default function Header() {
             >
               <BookmarkIcon className="size-4.5" />
               My list
-              <span className="min-w-7 h-7 px-2 rounded-full bg-surface text-xs font-bold inline-flex items-center justify-center">
-                0
-              </span>
             </Link>
 
-            <Link
-              href="/login"
-              className="bg-accent text-text font-bold text-nav rounded-full px-5 h-11 inline-flex items-center hover:opacity-90 transition-opacity"
-            >
-              Log in
-            </Link>
+            {user ? (
+              <div className="relative" ref={userRef}>
+                <button
+                  type="button"
+                  onClick={() => setUserOpen((v) => !v)}
+                  aria-expanded={userOpen}
+                  aria-haspopup="true"
+                  aria-label="Account menu"
+                  className="size-11 rounded-full overflow-hidden border border-border-strong bg-surface flex items-center justify-center cursor-pointer hover:brightness-95 transition"
+                >
+                  {user.photoUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={user.photoUrl}
+                      alt={user.displayName}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="font-bold text-text">
+                      {user.displayName.charAt(0).toUpperCase()}
+                    </span>
+                  )}
+                </button>
+
+                {userOpen && (
+                  <div className="absolute right-0 top-12 z-30 w-56 bg-bg border border-border rounded-2xl shadow-xl p-2">
+                    <div className="px-3 py-2 border-b border-border">
+                      <div className="text-sm font-bold text-text truncate">
+                        {user.displayName}
+                      </div>
+                      <div className="text-xs text-muted truncate">{user.email}</div>
+                    </div>
+                    <Link
+                      href="/settings"
+                      onClick={() => setUserOpen(false)}
+                      className="block px-3 py-2.5 rounded-xl text-text text-nav font-semibold hover:bg-surface transition-colors"
+                    >
+                      Settings
+                    </Link>
+                    <button
+                      type="button"
+                      onClick={onLogout}
+                      className="w-full text-left px-3 py-2.5 rounded-xl text-text text-nav font-semibold hover:bg-surface transition-colors cursor-pointer"
+                    >
+                      Log out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="bg-accent text-text font-bold text-nav rounded-full px-5 h-11 inline-flex items-center hover:opacity-90 transition-opacity"
+              >
+                Log in
+              </Link>
+            )}
           </div>
 
-          {/* Mobile hamburger — visible only on mobile */}
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}
@@ -155,7 +206,6 @@ export default function Header() {
           >
             <HamburgerIcon className="size-5 text-text" />
           </button>
-
         </div>
       </header>
 
@@ -176,24 +226,33 @@ function SugarCaneIcon({ className }: { className?: string }) {
 
 function ChevronDownIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M6 9l6 6 6-6" />
-    </svg>
-  );
-}
-
-function SearchIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <circle cx="11" cy="11" r="7" />
-      <path d="m21 21-4.3-4.3" />
     </svg>
   );
 }
 
 function BookmarkIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="#FFE07A" stroke="#B58900" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="#FFE07A"
+      stroke="#B58900"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z" />
     </svg>
   );
@@ -201,7 +260,15 @@ function BookmarkIcon({ className }: { className?: string }) {
 
 function HamburgerIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
       <path d="M4 6h16M4 12h16M4 18h16" />
     </svg>
   );

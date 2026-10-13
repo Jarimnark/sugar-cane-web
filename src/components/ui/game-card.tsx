@@ -3,47 +3,78 @@
 import Link from "next/link";
 import { useState } from "react";
 import Badge from "@/components/ui/badge";
+import { ApiError, browserApi } from "@/lib/api";
 import type { Game } from "@/types/api";
+
+export type GameCardVariant = "default" | "compact";
 
 interface GameCardProps {
   game: Game;
+  variant?: GameCardVariant;
   showSave?: boolean;
 }
 
-export default function GameCard({ game, showSave = false }: GameCardProps) {
-  const [liked, setLiked] = useState(false);
+export default function GameCard({ game, variant = "default", showSave }: GameCardProps) {
+  const [liked, setLiked] = useState(Boolean(game.liked));
   const [likeCount, setLikeCount] = useState(game.likeCount);
-  const [saved, setSaved] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const [saved, setSaved] = useState(Boolean(game.inMyList));
+  const [busy, setBusy] = useState(false);
+  const showSaveButton = showSave ?? true;
+  const isCompact = variant === "compact";
 
   async function toggleLike() {
-    if (loading) return;
-    setLoading(true);
+    if (busy) return;
+    setBusy(true);
+    const next = !liked;
+    setLiked(next);
+    setLikeCount((c) => c + (next ? 1 : -1));
     try {
-      const res = await fetch(`/api/games/${game.slug}/like`, { method: "POST" });
-      const data = (await res.json()) as { liked: boolean; likeCount: number };
-      setLiked(data.liked);
-      setLikeCount(data.likeCount);
+      if (next) await browserApi.likeGame(game.id);
+      else await browserApi.unlikeGame(game.id);
+    } catch (err) {
+      setLiked(!next);
+      setLikeCount((c) => c + (next ? -1 : 1));
+      if (err instanceof ApiError && err.status === 401) {
+        window.location.href = "/login";
+      }
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   }
 
   async function toggleSave() {
-    if (loading) return;
-    setLoading(true);
+    if (busy) return;
+    setBusy(true);
+    const next = !saved;
+    setSaved(next);
     try {
-      const res = await fetch(`/api/games/${game.slug}/save`, { method: "POST" });
-      const data = (await res.json()) as { saved: boolean };
-      setSaved(data.saved);
+      if (next) await browserApi.addToMyList(game.id);
+      else await browserApi.removeFromMyList(game.id);
+    } catch (err) {
+      setSaved(!next);
+      if (err instanceof ApiError && err.status === 401) {
+        window.location.href = "/login";
+      }
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   }
 
+  function trackClick() {
+    void browserApi.trackGameEvent(game.id, { type: "click", source: "card" }).catch(() => {});
+  }
+
+  const artHeight = isCompact ? "h-28" : "h-36";
+
   return (
     <article className="flex flex-col rounded-xl border border-border overflow-hidden bg-bg hover:shadow-lg transition-shadow">
-      <Link href={`/games/${game.slug}`} className="block h-36 shrink-0" tabIndex={-1} aria-hidden>
+      <Link
+        href={`/games/${game.slug}`}
+        onClick={trackClick}
+        className={`block ${artHeight} shrink-0`}
+        tabIndex={-1}
+        aria-hidden
+      >
         <div className="w-full h-full" style={{ backgroundColor: game.bg }} />
       </Link>
 
@@ -51,6 +82,7 @@ export default function GameCard({ game, showSave = false }: GameCardProps) {
         <div className="flex items-start justify-between gap-2">
           <Link
             href={`/games/${game.slug}`}
+            onClick={trackClick}
             className="font-semibold text-text text-sm leading-snug hover:underline line-clamp-2"
           >
             {game.name}
@@ -62,12 +94,14 @@ export default function GameCard({ game, showSave = false }: GameCardProps) {
           )}
         </div>
 
-        <p className="text-xs text-muted line-clamp-2">{game.pitch}</p>
+        {!isCompact && <p className="text-xs text-muted line-clamp-2">{game.pitch}</p>}
 
         <div className="flex flex-wrap gap-1 mt-auto pt-2">
           {game.genre.map((g) => (
             <Badge key={g} label={g} variant="genre" />
           ))}
+          {!isCompact &&
+            game.platforms.map((p) => <Badge key={p} label={p} variant="platform" />)}
         </div>
 
         <div className="flex items-center gap-2 mt-1">
@@ -75,18 +109,22 @@ export default function GameCard({ game, showSave = false }: GameCardProps) {
             type="button"
             onClick={toggleLike}
             aria-label={liked ? "Unlike" : "Like"}
-            className="flex items-center gap-1 text-xs text-muted hover:text-text transition-colors cursor-pointer"
+            aria-pressed={liked}
+            disabled={busy}
+            className="flex items-center gap-1 text-xs text-muted hover:text-text transition-colors cursor-pointer disabled:cursor-not-allowed"
           >
             <HeartIcon filled={liked} className="w-3.5 h-3.5" />
             {likeCount}
           </button>
 
-          {showSave && (
+          {showSaveButton && (
             <button
               type="button"
               onClick={toggleSave}
               aria-label={saved ? "Remove from list" : "Save to list"}
-              className={`ml-auto text-xs font-semibold transition-colors cursor-pointer ${
+              aria-pressed={saved}
+              disabled={busy}
+              className={`ml-auto text-xs font-semibold transition-colors cursor-pointer disabled:cursor-not-allowed ${
                 saved ? "text-accent" : "text-muted hover:text-text"
               }`}
             >
@@ -101,7 +139,16 @@ export default function GameCard({ game, showSave = false }: GameCardProps) {
 
 function HeartIcon({ filled, className }: { filled: boolean; className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
     </svg>
   );
