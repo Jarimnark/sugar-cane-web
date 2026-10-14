@@ -95,8 +95,9 @@ function serverBaseUrl() {
 
 function browserBaseUrl() {
   const base = process.env.NEXT_PUBLIC_API_URL;
-  if (!base) throw new Error("NEXT_PUBLIC_API_URL is not set");
-  return base;
+  if (base) return base;
+  if (typeof window !== "undefined") return window.location.origin;
+  throw new Error("NEXT_PUBLIC_API_URL is not set");
 }
 
 async function serverRequest<T>(path: string, options: RequestOptions = {}) {

@@ -69,7 +69,7 @@ export default function GameCard({ game, variant = "default", showSave }: GameCa
   return (
     <article className="flex flex-col rounded-xl border border-border overflow-hidden bg-bg hover:shadow-lg transition-shadow">
       <Link
-        href={`/games/${game.slug}`}
+        href={`/games/${game.id}`}
         onClick={trackClick}
         className={`block ${artHeight} shrink-0`}
         tabIndex={-1}
@@ -81,7 +81,7 @@ export default function GameCard({ game, variant = "default", showSave }: GameCa
       <div className="flex flex-col gap-2 p-4 flex-1">
         <div className="flex items-start justify-between gap-2">
           <Link
-            href={`/games/${game.slug}`}
+            href={`/games/${game.id}`}
             onClick={trackClick}
             className="font-semibold text-text text-sm leading-snug hover:underline line-clamp-2"
           >

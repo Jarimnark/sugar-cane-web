@@ -102,7 +102,7 @@ export default function GameTile({ game }: GameTileProps) {
 
       <div className="flex-none w-1/2 h-full px-4.5 py-4 border-l border-border flex flex-col gap-1.5 bg-bg">
         <Link
-          href={`/games/${game.slug}`}
+          href={`/games/${game.id}`}
           className="font-display font-bold text-base leading-tight text-text hover:text-accent transition-colors line-clamp-2"
         >
           {game.name}

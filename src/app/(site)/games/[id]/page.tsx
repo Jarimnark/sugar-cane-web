@@ -6,43 +6,61 @@ import type { Game } from "@/types/api";
 import GameActions from "./_components/game-actions";
 
 interface Props {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }
 
-async function loadGame(slug: string): Promise<Game> {
+async function loadGame(id: string): Promise<Game> {
   try {
-    return await serverApi.getGame(slug);
+    return await serverApi.getGame(id);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) notFound();
     throw err;
   }
 }
 
-async function loadRelated(slug: string): Promise<Game[]> {
+async function loadRelated(id: string): Promise<Game[]> {
   try {
-    return await serverApi.getRelatedGames(slug);
+    return await serverApi.getRelatedGames(id);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) return [];
     throw err;
   }
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+interface DescriptionBlock {
+  type?: string;
+  children?: Array<{ text?: string }>;
+}
+
+function describeToText(raw: string): string {
   try {
-    const game = await serverApi.getGame(slug);
+    const parsed = JSON.parse(raw) as { blocks?: DescriptionBlock[] };
+    if (!parsed?.blocks) return raw;
+    return parsed.blocks
+      .map((b) => (b.children ?? []).map((c) => c.text ?? "").join(""))
+      .filter(Boolean)
+      .join("\n\n");
+  } catch {
+    return raw;
+  }
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { id } = await params;
+  try {
+    const game = await serverApi.getGame(id);
     return {
       title: game.name,
       description: game.pitch,
     };
   } catch {
-    return { title: slug };
+    return { title: id };
   }
 }
 
 export default async function GamePage({ params }: Props) {
-  const { slug } = await params;
-  const [game, related] = await Promise.all([loadGame(slug), loadRelated(slug)]);
+  const { id } = await params;
+  const [game, related] = await Promise.all([loadGame(id), loadRelated(id)]);
   const relatedItems = related.filter((g) => g.id !== game.id);
 
   return (
@@ -106,7 +124,7 @@ export default async function GamePage({ params }: Props) {
               About
             </h2>
             <p className="text-base leading-relaxed text-muted whitespace-pre-wrap">
-              {game.description}
+              {describeToText(game.description)}
             </p>
           </div>
 

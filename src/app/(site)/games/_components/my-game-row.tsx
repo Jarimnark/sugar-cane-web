@@ -36,7 +36,7 @@ export default function MyGameRow({ game }: MyGameRowProps) {
     setBusy(true);
     setError(null);
     try {
-      await browserApi.deleteMyGame(game.slug);
+      await browserApi.deleteMyGame(game.id);
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError && err.status === 401) {
@@ -75,7 +75,7 @@ export default function MyGameRow({ game }: MyGameRowProps) {
 
       <div className="flex items-center gap-2 shrink-0">
         <Link
-          href={`/games/mine/${game.slug}/edit`}
+          href={`/games/mine/${game.id}/edit`}
           className="inline-flex items-center justify-center h-9 px-4 text-sm rounded-full bg-bg text-text border border-border-strong hover:bg-surface font-semibold transition-colors"
         >
           Edit

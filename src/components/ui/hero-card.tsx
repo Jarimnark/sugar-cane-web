@@ -97,7 +97,7 @@ export default function HeroCard({ game }: HeroCardProps) {
           )}
 
           <Link
-            href={`/games/${game.slug}`}
+            href={`/games/${game.id}`}
             className="h-13 px-6 rounded-full bg-white text-text font-bold text-nav inline-flex items-center border border-border hover:bg-surface transition-colors"
           >
             View game page

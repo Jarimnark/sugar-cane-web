@@ -5,20 +5,20 @@ import { ApiError, serverApi } from "@/lib/api";
 import GameForm from "../../../_components/game-form";
 
 interface Props {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ id: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
-  return { title: `Edit · ${slug}` };
+  const { id } = await params;
+  return { title: `Edit · ${id}` };
 }
 
 export default async function EditMyGamePage({ params }: Props) {
-  const { slug } = await params;
+  const { id } = await params;
 
   let game;
   try {
-    game = await serverApi.getMyGame(slug);
+    game = await serverApi.getMyGame(id);
   } catch (err) {
     if (err instanceof ApiError && err.status === 404) notFound();
     throw err;
