@@ -455,8 +455,8 @@ export default function GameForm({ initial }: GameFormProps) {
             Trailer video links <span className="font-normal text-muted">(optional, up to {MAX_VIDEO_LINKS})</span>
           </span>
           <p className="text-xs text-muted">
-            Paste YouTube or Google Drive links. Drive files must be shared as "Anyone with the
-            link".
+            Paste YouTube or Google Drive links. Drive files must be shared as &quot;Anyone with
+            the link&quot;.
           </p>
           {videoLinks.map((url, i) => (
             <div key={i} className="flex items-start gap-2">
