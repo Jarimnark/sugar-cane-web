@@ -1,4 +1,5 @@
 import Link from "next/link";
+import HopbuMark from "@/components/brand/hopbu-mark";
 
 export default function Footer() {
   return (
@@ -7,13 +8,16 @@ export default function Footer() {
 
         {/* Brand block */}
         <div className="flex flex-col gap-1.5">
-          <span className="font-display font-extrabold text-xl text-text">SugarCane</span>
+          <span className="inline-flex items-center gap-2">
+            <HopbuMark className="size-7" />
+            <span className="font-display font-extrabold text-xl text-text">Hopbu</span>
+          </span>
           <span className="text-muted text-sm">A shelf of web games, picked by players.</span>
           <span className="inline-flex items-center gap-2 text-muted text-sm">
             <MailIcon className="size-4 shrink-0" />
             Contact:{" "}
-            <a href="mailto:hello@sugarcane.example" className="font-bold text-text hover:underline">
-              hello@sugarcane.example
+            <a href="mailto:hello@hopbu.example" className="font-bold text-text hover:underline">
+              hello@hopbu.example
             </a>
           </span>
         </div>

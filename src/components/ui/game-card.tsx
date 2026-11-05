@@ -64,10 +64,14 @@ export default function GameCard({ game, variant = "default", showSave }: GameCa
     void browserApi.trackGameEvent(game.id, "click").catch(() => {});
   }
 
+  function trackPlay() {
+    void browserApi.trackGameEvent(game.id, "play").catch(() => {});
+  }
+
   const artHeight = isCompact ? "h-28" : "h-36";
 
   return (
-    <article className="flex flex-col rounded-xl border border-border overflow-hidden bg-bg hover:shadow-lg transition-shadow">
+    <article className="relative flex flex-col rounded-xl border border-border overflow-hidden bg-bg hover:shadow-lg transition-shadow">
       <Link
         href={`/games/${game.id}`}
         onClick={trackClick}
@@ -77,6 +81,19 @@ export default function GameCard({ game, variant = "default", showSave }: GameCa
       >
         <div className="w-full h-full" style={{ backgroundColor: game.bg }} />
       </Link>
+
+      {showSaveButton && (
+        <button
+          type="button"
+          onClick={toggleSave}
+          aria-label={saved ? "Remove from my list" : "Save to my list"}
+          aria-pressed={saved}
+          disabled={busy}
+          className="absolute top-2 right-2 size-9 rounded-full bg-bg shadow-md inline-flex items-center justify-center text-text hover:bg-surface transition-colors cursor-pointer disabled:cursor-not-allowed"
+        >
+          <BookmarkIcon filled={saved} className="size-4" />
+        </button>
+      )}
 
       <div className="flex flex-col gap-2 p-4 flex-1">
         <div className="flex items-start justify-between gap-2">
@@ -109,25 +126,36 @@ export default function GameCard({ game, variant = "default", showSave }: GameCa
             aria-label={liked ? "Unlike" : "Like"}
             aria-pressed={liked}
             disabled={busy}
-            className="flex items-center gap-1 text-xs text-muted hover:text-text transition-colors cursor-pointer disabled:cursor-not-allowed"
+            className={`inline-flex items-center gap-1.5 h-8 px-2.5 rounded-full border text-xs font-semibold transition-colors cursor-pointer disabled:cursor-not-allowed ${
+              liked
+                ? "bg-accent/10 border-accent text-text"
+                : "border-border text-muted hover:text-text"
+            }`}
           >
-            <HeartIcon filled={liked} className="w-3.5 h-3.5" />
+            <ThumbIcon filled={liked} className="size-3.5" />
             {likeCount}
           </button>
 
-          {showSaveButton && (
-            <button
-              type="button"
-              onClick={toggleSave}
-              aria-label={saved ? "Remove from list" : "Save to list"}
-              aria-pressed={saved}
-              disabled={busy}
-              className={`ml-auto text-xs font-semibold transition-colors cursor-pointer disabled:cursor-not-allowed ${
-                saved ? "text-accent" : "text-muted hover:text-text"
-              }`}
+          {game.link_web ? (
+            <a
+              href={game.link_web}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={trackPlay}
+              className="ml-auto inline-flex items-center gap-1 text-xs font-bold text-text hover:underline"
+              aria-label={`Play ${game.name}`}
             >
-              {saved ? "Saved" : "Save"}
-            </button>
+              Play
+              <ExternalIcon className="size-3" />
+            </a>
+          ) : (
+            <Link
+              href={`/games/${game.id}`}
+              onClick={trackClick}
+              className="ml-auto inline-flex items-center gap-1 text-xs font-bold text-text hover:underline"
+            >
+              View
+            </Link>
           )}
         </div>
       </div>
@@ -135,7 +163,7 @@ export default function GameCard({ game, variant = "default", showSave }: GameCa
   );
 }
 
-function HeartIcon({ filled, className }: { filled: boolean; className?: string }) {
+function ThumbIcon({ className, filled }: { className?: string; filled?: boolean }) {
   return (
     <svg
       className={className}
@@ -147,7 +175,44 @@ function HeartIcon({ filled, className }: { filled: boolean; className?: string 
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      <path d="M7 10v11" />
+      <path d="M15 5.9 14 10h5.8a2 2 0 0 1 1.9 2.6l-2.3 7A2 2 0 0 1 17.5 21H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h2.8a2 2 0 0 0 1.8-1.1L12 3a3.1 3.1 0 0 1 3 2.9z" />
+    </svg>
+  );
+}
+
+function BookmarkIcon({ className, filled }: { className?: string; filled?: boolean }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z" />
+    </svg>
+  );
+}
+
+function ExternalIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      className={className}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M15 3h6v6" />
+      <path d="M10 14 21 3" />
+      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
     </svg>
   );
 }

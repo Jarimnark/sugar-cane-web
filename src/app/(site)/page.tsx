@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { serverApi } from "@/lib/api";
 import HeroCard from "@/components/ui/hero-card";
-import GameCard from "@/components/ui/game-card";
+import GameTile from "@/components/ui/game-tile";
 import type { Game } from "@/types/api";
 
 export const metadata: Metadata = {
@@ -18,54 +17,24 @@ export default async function HomePage() {
     <div className="max-w-340 mx-auto px-4 sm:px-6 lg:px-10 py-10 flex flex-col gap-12">
       {hero ? <HeroCard game={hero} /> : <EmptyHero />}
 
-      <GameSection
-        title="Trending"
-        seeAllHref="/browse?sort=trending"
-        games={home.trending.slice(1)}
-      />
-
-      <GameSection
-        title="Most Popular"
-        seeAllHref="/browse?sort=popular"
-        games={home.popular}
-      />
-
-      <GameSection
-        title="New this week"
-        seeAllHref="/browse?sort=newest"
-        games={home.new}
-      />
+      <GameSection title="Trending" games={home.trending.slice(1)} />
+      <GameSection title="Most Popular" games={home.popular} />
+      <GameSection title="New this week" games={home.new} />
     </div>
   );
 }
 
-function GameSection({
-  title,
-  seeAllHref,
-  games,
-}: {
-  title: string;
-  seeAllHref: string;
-  games: Game[];
-}) {
+function GameSection({ title, games }: { title: string; games: Game[] }) {
   if (games.length === 0) return null;
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-5">
-        <h2 className="font-display font-bold text-3xl tracking-tight text-text">
-          {title}
-        </h2>
-        <Link
-          href={seeAllHref}
-          className="text-nav font-semibold text-muted hover:text-text transition-colors"
-        >
-          See all
-        </Link>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+      <h2 className="font-display font-bold text-[28px] tracking-[-0.5px] text-text mb-4">
+        {title}
+      </h2>
+      <div className="flex gap-5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {games.map((game) => (
-          <GameCard key={game.id} game={game} variant="default" />
+          <GameTile key={game.id} game={game} />
         ))}
       </div>
     </section>

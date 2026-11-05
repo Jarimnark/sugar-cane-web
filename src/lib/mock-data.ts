@@ -191,3 +191,109 @@ export const MOCK_USER: User = {
 };
 
 export const MOCK_USER_LIST_SLUGS = ["celeste-classic", "2048", "wordle"];
+
+import type {
+  CategoryDetailResponse,
+  HomeResponse,
+  MasterOption,
+} from "@/types/api";
+
+export const MOCK_MASTER_OPTION: MasterOption = {
+  genres: [
+    { id: "g1", name: "Puzzle", slug: "puzzle" },
+    { id: "g2", name: "Action", slug: "action" },
+    { id: "g3", name: "Strategy", slug: "strategy" },
+    { id: "g4", name: "Arcade", slug: "arcade" },
+    { id: "g5", name: "Idle", slug: "idle" },
+    { id: "g6", name: "Multiplayer", slug: "multiplayer" },
+  ],
+  platforms: [
+    { id: "p1", name: "Browser", slug: "browser" },
+    { id: "p2", name: "Mobile", slug: "mobile" },
+  ],
+  play_styles: [
+    { id: "ps1", name: "Casual", slug: "casual" },
+    { id: "ps2", name: "Co-op", slug: "co-op" },
+    { id: "ps3", name: "PvP", slug: "pvp" },
+    { id: "ps4", name: "PvE", slug: "pve" },
+    { id: "ps5", name: "Story-Driven", slug: "story-driven" },
+    { id: "ps6", name: "Fast Reflex", slug: "fast-reflex" },
+    { id: "ps7", name: "Brain", slug: "brain" },
+  ],
+  player_counts: [
+    { id: "pc1", name: "1 Player", slug: "single-player" },
+    { id: "pc2", name: "2 Players (Same Device)", slug: "local-2p" },
+    { id: "pc3", name: "Online Multiplayer", slug: "online-multiplayer" },
+  ],
+};
+
+export const MOCK_CATEGORY_DETAIL: CategoryDetailResponse = {
+  genres: [
+    { id: "g1", name: "Puzzle", slug: "puzzle", game_count: 3 },
+    { id: "g2", name: "Action", slug: "action", game_count: 1 },
+    { id: "g3", name: "Strategy", slug: "strategy", game_count: 1 },
+    { id: "g4", name: "Arcade", slug: "arcade", game_count: 2 },
+    { id: "g5", name: "Idle", slug: "idle", game_count: 2 },
+    { id: "g6", name: "Multiplayer", slug: "multiplayer", game_count: 4 },
+  ],
+  platforms: [
+    { id: "p1", name: "Browser", slug: "browser", game_count: 8 },
+    { id: "p2", name: "Mobile", slug: "mobile", game_count: 5 },
+  ],
+};
+
+const TAG_GENRE_MAP: Record<string, string> = {
+  puzzle: "g1",
+  word: "g1",
+  platformer: "g1",
+  action: "g2",
+  fps: "g2",
+  strategy: "g3",
+  arcade: "g4",
+  idle: "g5",
+  clicker: "g5",
+  incremental: "g5",
+  multiplayer: "g6",
+  competitive: "g6",
+};
+
+export function filterMockGames(filter: {
+  genre_id?: string;
+  platform_id?: string;
+  sort?: string;
+}): Game[] {
+  let games = [...MOCK_GAMES];
+
+  if (filter.genre_id) {
+    games = games.filter((g) =>
+      g.tags.some((t) => TAG_GENRE_MAP[t.toLowerCase()] === filter.genre_id),
+    );
+  }
+
+  if (filter.platform_id === "p2") {
+    games = games.filter(
+      (g) => !g.tags.some((t) => t.toLowerCase() === "fps"),
+    );
+  }
+
+  if (filter.sort === "newest") {
+    games = games.slice().reverse();
+  } else if (filter.sort === "az") {
+    games = games.slice().sort((a, b) => a.name.localeCompare(b.name));
+  } else {
+    games = games.slice().sort((a, b) => b.like_count - a.like_count);
+  }
+
+  return games;
+}
+
+export function getMockHome(): HomeResponse {
+  const byLikes = [...MOCK_GAMES].sort((a, b) => b.like_count - a.like_count);
+  return {
+    trending: byLikes.slice(0, 4),
+    popular: byLikes.slice(4, 8),
+    new: [...MOCK_GAMES].slice(-4).reverse(),
+  };
+}
+
+export const MOCK_SAVED_GAME_IDS = new Set(["1", "2", "6"]);

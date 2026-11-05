@@ -25,7 +25,7 @@ export default async function EditMyGamePage({ params }: Props) {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
       <Link
         href="/games/mine"
         className="text-sm text-muted hover:text-text transition-colors inline-block mb-4"

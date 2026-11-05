@@ -1,14 +1,20 @@
 import type {
   CategoryDetailResponse,
+  CommentListResponse,
+  CommentSort,
+  ConnectionStatus,
+  CreateCommentPayload,
   CreateGamePayload,
   CreateProfilePayload,
   Game,
+  GameComment,
   GameEventType,
   GameListFilter,
   HomeResponse,
   MasterOption,
   MyGame,
   OAuthProvider,
+  SessionsSummary,
   SuggestResponse,
   UpdateProfilePayload,
   User,
@@ -129,6 +135,15 @@ export const serverApi = {
     serverRequest<Game[]>("/me/list", { query: { sort } }),
   getMyGames: () => serverRequest<MyGame[]>("/me/game"),
   getMyGame: (id: string) => serverRequest<MyGame>(`/me/game/${id}`),
+  getConnections: () => serverRequest<ConnectionStatus[]>("/me/connections"),
+  getSessions: () => serverRequest<SessionsSummary>("/me/sessions"),
+  getGameComments: (
+    gameId: string,
+    opts?: { sort?: CommentSort; page?: number; limit?: number },
+  ) =>
+    serverRequest<CommentListResponse>(`/game/${gameId}/comments`, {
+      query: { sort: opts?.sort, page: opts?.page, limit: opts?.limit },
+    }),
 };
 
 export const browserApi = {
@@ -170,6 +185,9 @@ export const browserApi = {
     browserRequest<void>(`/me/connection/${provider}`, { method: "POST" }),
   unlinkConnection: (provider: OAuthProvider) =>
     browserRequest<void>(`/me/connection/${provider}`, { method: "DELETE" }),
+  getConnections: () => browserRequest<ConnectionStatus[]>("/me/connections"),
+  getSessions: () => browserRequest<SessionsSummary>("/me/sessions"),
+  logoutEverywhere: () => browserRequest<void>("/me/sessions", { method: "DELETE" }),
 
   getMyGames: () => browserRequest<MyGame[]>("/me/game"),
   getMyGame: (id: string) => browserRequest<MyGame>(`/me/game/${id}`),
@@ -181,6 +199,44 @@ export const browserApi = {
     }),
   deleteMyGame: (id: string) =>
     browserRequest<void>(`/me/game/${id}`, { method: "DELETE" }),
+
+  uploadMedia: async (file: File, kind: "banner" | "screenshot") => {
+    const base = browserBaseUrl().replace(/\/$/, "");
+    const form = new FormData();
+    form.append("file", file);
+    const res = await fetch(`${base}${API_PREFIX}/me/game/screenshot?kind=${kind}`, {
+      method: "POST",
+      body: form,
+      credentials: "include",
+    });
+    if (!res.ok) {
+      const text = await res.text().catch(() => "");
+      throw new ApiError(res.status, text || `upload failed with ${res.status}`, text);
+    }
+    return (await res.json()) as { url: string };
+  },
+
+  uploadScreenshot: async (file: File) =>
+    browserApi.uploadMedia(file, "screenshot"),
+
+  getGameComments: (
+    gameId: string,
+    opts?: { sort?: CommentSort; page?: number; limit?: number },
+  ) =>
+    browserRequest<CommentListResponse>(`/game/${gameId}/comments`, {
+      query: { sort: opts?.sort, page: opts?.page, limit: opts?.limit },
+    }),
+  createComment: (gameId: string, payload: CreateCommentPayload) =>
+    browserRequest<GameComment>(`/game/${gameId}/comments`, {
+      method: "POST",
+      body: payload,
+    }),
+  deleteComment: (commentId: string) =>
+    browserRequest<void>(`/comment/${commentId}`, { method: "DELETE" }),
+  likeComment: (commentId: string) =>
+    browserRequest<void>(`/comment/${commentId}/like`, { method: "PUT" }),
+  unlikeComment: (commentId: string) =>
+    browserRequest<void>(`/comment/${commentId}/like`, { method: "DELETE" }),
 };
 
 export type ServerApi = typeof serverApi;

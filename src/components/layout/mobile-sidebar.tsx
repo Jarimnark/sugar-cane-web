@@ -1,8 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect } from "react";
-import { MOCK_CATEGORIES, MOCK_PLATFORMS } from "@/lib/mock-data";
+import { useEffect, useState } from "react";
+import HopbuMark from "@/components/brand/hopbu-mark";
+import { browserApi } from "@/lib/api";
+import type { CategoryItem } from "@/types/api";
 
 interface MobileSidebarProps {
   open: boolean;
@@ -10,7 +12,25 @@ interface MobileSidebarProps {
 }
 
 export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
-  const totalGames = MOCK_CATEGORIES.reduce((sum, c) => sum + c.count, 0);
+  const [genres, setGenres] = useState<CategoryItem[]>([]);
+  const [platforms, setPlatforms] = useState<CategoryItem[]>([]);
+  const totalGames = genres.reduce((sum, g) => sum + g.game_count, 0);
+
+  useEffect(() => {
+    if (!open) return;
+    let cancelled = false;
+    browserApi
+      .getCategoryDetail()
+      .then((data) => {
+        if (cancelled) return;
+        setGenres(data.genres);
+        setPlatforms(data.platforms);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [open]);
 
   // Lock body scroll while open
   useEffect(() => {
@@ -52,9 +72,11 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
           <Link
             href="/"
             onClick={onClose}
-            className="font-display font-extrabold text-xl tracking-tight text-text"
+            aria-label="Hopbu home"
+            className="flex items-center gap-2 text-text"
           >
-            SugarCane
+            <HopbuMark className="size-7" />
+            <span className="font-display font-extrabold text-xl tracking-tight">Hopbu</span>
           </Link>
           <button
             type="button"
@@ -102,30 +124,30 @@ export default function MobileSidebar({ open, onClose }: MobileSidebarProps) {
 
               <p className="mt-4 mb-1.5 text-xs font-bold text-muted tracking-widest uppercase">Genre</p>
               <div className="flex flex-col">
-                {MOCK_CATEGORIES.map((cat) => (
+                {genres.map((cat) => (
                   <Link
-                    key={cat.slug}
-                    href={`/browse?genre=${cat.slug}`}
+                    key={cat.id}
+                    href={`/browse?genre_id=${cat.id}`}
                     onClick={onClose}
                     className="flex justify-between items-center py-2.5 border-b border-border/50 last:border-0 text-text text-nav font-semibold"
                   >
-                    {cat.label}
-                    <span className="text-muted text-xs">{cat.count}</span>
+                    {cat.name}
+                    <span className="text-muted text-xs">{cat.game_count}</span>
                   </Link>
                 ))}
               </div>
 
               <p className="mt-4 mb-1.5 text-xs font-bold text-muted tracking-widest uppercase">Platform</p>
               <div className="flex flex-col">
-                {MOCK_PLATFORMS.map((p) => (
+                {platforms.map((p) => (
                   <Link
-                    key={p.slug}
-                    href={`/browse?platform=${p.slug}`}
+                    key={p.id}
+                    href={`/browse?platform_id=${p.id}`}
                     onClick={onClose}
                     className="flex justify-between items-center py-2.5 border-b border-border/50 last:border-0 text-text text-nav font-semibold"
                   >
-                    {p.label}
-                    <span className="text-muted text-xs">{p.count}</span>
+                    {p.name}
+                    <span className="text-muted text-xs">{p.game_count}</span>
                   </Link>
                 ))}
               </div>

@@ -17,6 +17,11 @@ export default function HeroCard({ game }: HeroCardProps) {
 
   const headlineTags = game.tags.slice(0, 3);
 
+  const playLinks: { href: string; label: string; top: string; big: string }[] = [];
+  if (game.link_web) playLinks.push({ href: game.link_web, label: "Play in browser", top: "Play in", big: "Browser" });
+  if (game.link_android) playLinks.push({ href: game.link_android, label: "Get it on Android", top: "Get it on", big: "Android" });
+  if (game.link_ios) playLinks.push({ href: game.link_ios, label: "Download on iOS", top: "Download on", big: "iOS" });
+
   async function toggleLike() {
     if (busy) return;
     setBusy(true);
@@ -56,10 +61,10 @@ export default function HeroCard({ game }: HeroCardProps) {
   }
 
   return (
-    <div className="relative rounded-3xl overflow-hidden min-h-110 flex flex-col justify-end p-8 sm:p-12 bg-hero-bg">
-      <div className="absolute -top-20 -right-20 size-96 rounded-full bg-hero-circle pointer-events-none" />
-      <div className="absolute top-8 right-8 size-64 rounded-full border-4 border-hero-ring pointer-events-none" />
-      <div className="absolute top-24 right-24 size-28 rounded-2xl rotate-12 bg-hero-square pointer-events-none" />
+    <div className="relative rounded-3xl overflow-hidden min-h-110 flex flex-col justify-end p-8 sm:p-12 bg-[#F1ECFF]">
+      <div className="absolute -top-20 -right-20 size-96 rounded-full bg-[#E3DAFF] pointer-events-none" />
+      <div className="absolute top-8 right-8 size-64 rounded-full border-4 border-[#C9B8F5] pointer-events-none" />
+      <div className="absolute top-24 right-24 size-28 rounded-2xl rotate-12 bg-[#D6C9FB] pointer-events-none" />
 
       <div className="relative flex flex-col gap-5 max-w-xl">
         <span className="inline-flex items-center self-start bg-accent text-text text-xs font-bold uppercase tracking-widest rounded-full px-3.5 py-1.5">
@@ -80,21 +85,25 @@ export default function HeroCard({ game }: HeroCardProps) {
           </div>
         )}
 
-        <p className="text-lg leading-snug max-w-lg text-hero-text">{game.pitch}</p>
+        <p className="text-lg leading-snug max-w-lg text-[#4D4766]">{game.pitch}</p>
 
         <div className="flex flex-wrap items-center gap-3 mt-1">
-          {game.link_web && (
+          {playLinks.map((pl) => (
             <a
-              href={game.link_web}
+              key={pl.href}
+              href={pl.href}
               target="_blank"
               rel="noopener noreferrer"
-              className="h-13 px-6 rounded-full bg-accent text-text font-bold text-nav inline-flex items-center gap-2 hover:opacity-90 transition-opacity"
+              aria-label={pl.label}
+              className="h-14 px-4 rounded-2xl bg-accent text-text font-bold inline-flex items-center gap-2.5 hover:opacity-90 transition-opacity"
             >
-              <PlayIcon className="size-4.5" />
-              Play now
-              <ExternalIcon className="size-3.5 opacity-60" />
+              <GlobeIcon className="size-6" />
+              <span className="flex flex-col leading-tight text-left">
+                <span className="text-xs font-semibold opacity-80">{pl.top}</span>
+                <span className="text-lg font-extrabold">{pl.big}</span>
+              </span>
             </a>
-          )}
+          ))}
 
           <Link
             href={`/games/${game.id}`}
@@ -109,13 +118,13 @@ export default function HeroCard({ game }: HeroCardProps) {
             disabled={busy}
             aria-label={saved ? "Remove from list" : "Save to list"}
             aria-pressed={saved}
-            className={`size-13 rounded-full inline-flex items-center justify-center border transition-colors cursor-pointer disabled:cursor-not-allowed ${
-              saved
-                ? "bg-accent/10 border-accent"
-                : "bg-white border-border hover:bg-surface"
-            }`}
+            className="size-13 rounded-full inline-flex items-center justify-center border border-border bg-white hover:bg-surface transition-colors cursor-pointer disabled:cursor-not-allowed"
           >
-            <BookmarkIcon className="size-5" filled={saved} />
+            {saved ? (
+              <BookmarkFilledIcon className="size-5" />
+            ) : (
+              <PlusIcon className="size-5" />
+            )}
           </button>
 
           <button
@@ -130,7 +139,7 @@ export default function HeroCard({ game }: HeroCardProps) {
                 : "bg-white border-border text-text hover:bg-surface"
             }`}
           >
-            <HeartIcon className="size-4.5" filled={liked} />
+            <ThumbsUpIcon className="size-4.5" filled={liked} />
             {likeCount.toLocaleString()}
           </button>
         </div>
@@ -139,54 +148,46 @@ export default function HeroCard({ game }: HeroCardProps) {
   );
 }
 
-function PlayIcon({ className }: { className?: string }) {
+function GlobeIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M8 5v14l11-7z" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <circle cx="12" cy="12" r="9" />
+      <path d="M3 12h18" />
+      <path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18z" />
     </svg>
   );
 }
 
-function ExternalIcon({ className }: { className?: string }) {
+function PlusIcon({ className }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-      <polyline points="15 3 21 3 21 9" />
-      <line x1="10" y1="14" x2="21" y2="3" />
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true">
+      <path d="M12 5v14M5 12h14" />
     </svg>
   );
 }
 
-function BookmarkIcon({ className, filled }: { className?: string; filled?: boolean }) {
+function BookmarkFilledIcon({ className }: { className?: string }) {
   return (
-    <svg
-      className={className}
-      viewBox="0 0 24 24"
-      fill={filled ? "#FFE07A" : "none"}
-      stroke={filled ? "#B58900" : "currentColor"}
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
+    <svg className={className} viewBox="0 0 24 24" fill="#141A14" stroke="#141A14" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M6 3h12a1 1 0 0 1 1 1v17l-7-4.5L5 21V4a1 1 0 0 1 1-1z" />
     </svg>
   );
 }
 
-function HeartIcon({ className, filled }: { className?: string; filled?: boolean }) {
+function ThumbsUpIcon({ className, filled }: { className?: string; filled?: boolean }) {
   return (
     <svg
       className={className}
       viewBox="0 0 24 24"
-      fill={filled ? "#5cd068" : "none"}
-      stroke={filled ? "#5cd068" : "currentColor"}
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
     >
-      <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+      <path d="M7 10v11" />
+      <path d="M15 5.9 14 10h5.8a2 2 0 0 1 1.9 2.6l-2.3 7A2 2 0 0 1 17.5 21H4a1 1 0 0 1-1-1v-9a1 1 0 0 1 1-1h2.8a2 2 0 0 0 1.8-1.1L12 3a3.1 3.1 0 0 1 3 2.9z" />
     </svg>
   );
 }

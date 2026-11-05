@@ -2,16 +2,19 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import HopbuMark from "@/components/brand/hopbu-mark";
 import MobileSidebar from "@/components/layout/mobile-sidebar";
 import SearchBar from "@/components/ui/search-bar";
 import { browserApi } from "@/lib/api";
 import { useSession } from "@/hooks/useSession";
-import { MOCK_CATEGORIES, MOCK_PLATFORMS } from "@/lib/mock-data";
+import type { CategoryItem } from "@/types/api";
 
 export default function Header() {
   const [catsOpen, setCatsOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [genres, setGenres] = useState<CategoryItem[]>([]);
+  const [platforms, setPlatforms] = useState<CategoryItem[]>([]);
   const catsRef = useRef<HTMLDivElement>(null);
   const userRef = useRef<HTMLDivElement>(null);
   const { user, refresh } = useSession();
@@ -29,6 +32,21 @@ export default function Header() {
     return () => document.removeEventListener("mousedown", onOutsideClick);
   }, []);
 
+  useEffect(() => {
+    let cancelled = false;
+    browserApi
+      .getCategoryDetail()
+      .then((data) => {
+        if (cancelled) return;
+        setGenres(data.genres);
+        setPlatforms(data.platforms);
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   async function onLogout() {
     try {
       await browserApi.logout();
@@ -39,7 +57,7 @@ export default function Header() {
     }
   }
 
-  const totalGames = MOCK_CATEGORIES.reduce((sum, c) => sum + c.count, 0);
+  const totalGames = genres.reduce((sum, g) => sum + g.game_count, 0);
 
   return (
     <>
@@ -47,11 +65,11 @@ export default function Header() {
         <div className="max-w-340 mx-auto px-4 sm:px-6 lg:px-10 py-3.5 flex items-center gap-x-7">
           <Link
             href="/"
-            aria-label="SugarCane home"
+            aria-label="Hopbu home"
             className="flex items-center gap-2.5 text-text shrink-0"
           >
-            <SugarCaneIcon className="size-7.5" />
-            <span className="font-display font-extrabold text-2xl tracking-tight">SugarCane</span>
+            <HopbuMark className="size-8" />
+            <span className="font-display font-extrabold text-2xl tracking-tight">Hopbu</span>
           </Link>
 
           <nav
@@ -87,15 +105,15 @@ export default function Header() {
                     Genre
                   </span>
                   <div className="grid grid-cols-2 gap-0.5">
-                    {MOCK_CATEGORIES.map((cat) => (
+                    {genres.map((cat) => (
                       <Link
-                        key={cat.slug}
-                        href={`/browse?genre=${cat.slug}`}
+                        key={cat.id}
+                        href={`/browse?genre_id=${cat.id}`}
                         onClick={() => setCatsOpen(false)}
                         className="flex justify-between items-center px-3 py-2.5 rounded-xl text-text text-nav font-semibold hover:bg-surface transition-colors"
                       >
-                        {cat.label}
-                        <span className="text-muted text-xs">{cat.count}</span>
+                        {cat.name}
+                        <span className="text-muted text-xs">{cat.game_count}</span>
                       </Link>
                     ))}
                   </div>
@@ -104,15 +122,15 @@ export default function Header() {
                     Platform
                   </span>
                   <div className="grid grid-cols-2 gap-0.5">
-                    {MOCK_PLATFORMS.map((p) => (
+                    {platforms.map((p) => (
                       <Link
-                        key={p.slug}
-                        href={`/browse?platform=${p.slug}`}
+                        key={p.id}
+                        href={`/browse?platform_id=${p.id}`}
                         onClick={() => setCatsOpen(false)}
                         className="flex justify-between items-center px-3 py-2.5 rounded-xl text-text text-nav font-semibold hover:bg-surface transition-colors"
                       >
-                        {p.label}
-                        <span className="text-muted text-xs">{p.count}</span>
+                        {p.name}
+                        <span className="text-muted text-xs">{p.game_count}</span>
                       </Link>
                     ))}
                   </div>
@@ -211,16 +229,6 @@ export default function Header() {
 
       <MobileSidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
     </>
-  );
-}
-
-function SugarCaneIcon({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <rect x="9" y="3" width="6" height="26" rx="3" fill="#5CD068" />
-      <rect x="18" y="8" width="6" height="21" rx="3" fill="#5CD068" opacity="0.55" />
-      <path d="M9 11h6M9 19h6M18 16h6" stroke="#FFFFFF" strokeWidth="2" />
-    </svg>
   );
 }
 

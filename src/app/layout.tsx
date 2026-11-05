@@ -14,7 +14,7 @@ const bricolageGrotesque = Bricolage_Grotesque({
 });
 
 export const metadata: Metadata = {
-  title: { default: "SugarCane", template: "%s — SugarCane" },
+  title: { default: "Hopbu", template: "%s — Hopbu" },
   description: "A web-game shelf where you manage and share your game collection.",
 };
 

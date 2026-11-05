@@ -7,7 +7,7 @@ export const metadata: Metadata = {
 
 export default function NewGamePage() {
   return (
-    <div className="max-w-2xl mx-auto px-4 sm:px-6 py-10">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10">
       <h1 className="font-display font-extrabold text-3xl tracking-tight text-text mb-2">
         Add a game
       </h1>
