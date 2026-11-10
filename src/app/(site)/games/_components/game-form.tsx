@@ -320,7 +320,7 @@ export default function GameForm({ initial }: GameFormProps) {
           />
         </FormField>
 
-        <div className="flex flex-col gap-2 border-t border-border pt-4">
+        <div id="field-links" className="scroll-mt-24 flex flex-col gap-2 border-t border-border pt-4">
           <span className="font-display font-bold text-base text-text">Where players play</span>
           <p className="text-xs text-muted">
             Each link is optional, but add at least one. Links must open a page, never start a
@@ -387,12 +387,14 @@ export default function GameForm({ initial }: GameFormProps) {
       <section className="flex flex-col gap-5 rounded-2xl border border-border bg-bg p-6">
         <h2 className="font-display font-bold text-xl text-text">Media</h2>
 
-        <BannerUpload
-          value={banner}
-          onChange={setBanner}
-          invalid={Boolean(errors.banner)}
-          error={errors.banner}
-        />
+        <div id="field-banner" className="scroll-mt-24">
+          <BannerUpload
+            value={banner}
+            onChange={setBanner}
+            invalid={Boolean(errors.banner)}
+            error={errors.banner}
+          />
+        </div>
 
         <div className="flex flex-col gap-3 border-t border-border pt-4">
           <span className="text-sm font-semibold text-text">
@@ -521,7 +523,7 @@ export default function GameForm({ initial }: GameFormProps) {
           {errors.pitch && <p className="text-xs text-red-700">{errors.pitch}</p>}
         </div>
 
-        <div className="flex flex-col gap-1.5">
+        <div id="field-description" className="scroll-mt-24 flex flex-col gap-1.5">
           <label className="text-sm font-semibold text-text">Description</label>
           <RichTextEditor
             value={description}
@@ -534,7 +536,7 @@ export default function GameForm({ initial }: GameFormProps) {
         </div>
 
         {masterOptions && masterOptions.genres.length > 0 && (
-          <div className="flex flex-col gap-2">
+          <div id="field-genres" className="scroll-mt-24 flex flex-col gap-2">
             <div className="flex items-baseline gap-2">
               <span className="text-sm font-semibold text-text">Genre</span>
               <span className="text-xs text-muted">Pick 1 to {MAX_GENRES}</span>
@@ -577,11 +579,13 @@ export default function GameForm({ initial }: GameFormProps) {
           </div>
         )}
 
-        <PlayStyleRadios
-          value={playStyle}
-          onChange={setPlayStyle}
-          error={errors.play_style}
-        />
+        <div id="field-play_style" className="scroll-mt-24">
+          <PlayStyleRadios
+            value={playStyle}
+            onChange={setPlayStyle}
+            error={errors.play_style}
+          />
+        </div>
 
         <FormField id="players" label="Number of players" error={errors.players}>
           <Select
@@ -595,7 +599,7 @@ export default function GameForm({ initial }: GameFormProps) {
         </FormField>
 
         {masterOptions && masterOptions.platforms.length > 0 && (
-          <div className="flex flex-col gap-2">
+          <div id="field-platforms" className="scroll-mt-24 flex flex-col gap-2">
             <span className="text-sm font-semibold text-text">Platform</span>
             <div className="flex flex-wrap gap-4">
               {masterOptions.platforms.map((platform) => {
