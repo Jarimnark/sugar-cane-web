@@ -18,7 +18,7 @@ const FIELD_LABELS: Record<string, string> = {
   banner: "Banner image",
   genres: "Genre",
   platforms: "Platform",
-  play_style: "Play style",
+  play_styles: "Play style",
 };
 
 function fieldLabel(key: string): string {

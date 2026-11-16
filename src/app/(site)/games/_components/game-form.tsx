@@ -22,15 +22,17 @@ import {
   MAX_TAGS,
   MAX_VIDEO_LINKS,
   MIN_DESCRIPTION_CHARS,
+  MAX_PLAY_STYLES,
   MIN_GENRES,
   MIN_PLATFORMS,
+  MIN_PLAY_STYLES,
   PLAYERS_OPTIONS,
   VIDEO_URL_RE,
 } from "@/lib/catalog";
-import type { CreateGamePayload, Game, MasterOption, PlayStyleSlug } from "@/types/api";
+import type { CreateGamePayload, Game, MasterOption } from "@/types/api";
 import BannerUpload from "./banner-upload";
 import ErrorSummary from "./error-summary";
-import PlayStyleRadios from "./play-style-radios";
+import PlayStyleChips from "./play-style-chips";
 import PreviewCard from "./preview-card";
 import SuccessOverlay from "./success-overlay";
 
@@ -79,7 +81,9 @@ export default function GameForm({ initial }: GameFormProps) {
   const [tags, setTags] = useState<string[]>(initial?.tags ?? []);
   const [tagInput, setTagInput] = useState("");
   const [banner, setBanner] = useState<string | null>(initial?.banner ?? null);
-  const [playStyle, setPlayStyle] = useState<PlayStyleSlug | "">(initial?.play_style ?? "");
+  const [playStyleIds, setPlayStyleIds] = useState<string[]>(
+    initial?.play_styles?.map((p) => p.id) ?? [],
+  );
   const [genreIds, setGenreIds] = useState<string[]>(initial?.genres?.map((g) => g.id) ?? []);
   const [platformIds, setPlatformIds] = useState<string[]>(
     initial?.platforms?.map((p) => p.id) ?? [],
@@ -163,7 +167,9 @@ export default function GameForm({ initial }: GameFormProps) {
     if (genreIds.length < MIN_GENRES) next.genres = "Pick at least one genre.";
     else if (genreIds.length > MAX_GENRES) next.genres = `Pick up to ${MAX_GENRES} genres.`;
     if (platformIds.length < MIN_PLATFORMS) next.platforms = "Pick at least one platform.";
-    if (!playStyle) next.play_style = "Pick a play style.";
+    if (playStyleIds.length < MIN_PLAY_STYLES) next.play_styles = "Pick at least one play style.";
+    else if (playStyleIds.length > MAX_PLAY_STYLES)
+      next.play_styles = `Pick up to ${MAX_PLAY_STYLES} play styles.`;
 
     const hasAnyLink = Boolean(linkWeb.trim() || linkAndroid.trim() || linkIos.trim());
     if (!hasAnyLink) {
@@ -219,7 +225,7 @@ export default function GameForm({ initial }: GameFormProps) {
       link_ios: linkIos.trim() || undefined,
       tags,
       banner: banner ?? undefined,
-      play_style: playStyle || undefined,
+      play_style_ids: playStyleIds.length > 0 ? playStyleIds : undefined,
       genre_ids: genreIds.length > 0 ? genreIds : undefined,
       platform_ids: platformIds.length > 0 ? platformIds : undefined,
       video_links: filledVideos.length > 0 ? filledVideos : undefined,
@@ -268,7 +274,7 @@ export default function GameForm({ initial }: GameFormProps) {
     setTags([]);
     setTagInput("");
     setBanner(null);
-    setPlayStyle("");
+    setPlayStyleIds([]);
     setGenreIds([]);
     setPlatformIds([]);
     setVideoLinks([]);
@@ -579,11 +585,13 @@ export default function GameForm({ initial }: GameFormProps) {
           </div>
         )}
 
-        <div id="field-play_style" className="scroll-mt-24">
-          <PlayStyleRadios
-            value={playStyle}
-            onChange={setPlayStyle}
-            error={errors.play_style}
+        <div id="field-play_styles" className="scroll-mt-24">
+          <PlayStyleChips
+            options={masterOptions?.play_styles ?? []}
+            selectedIds={playStyleIds}
+            onChange={setPlayStyleIds}
+            max={MAX_PLAY_STYLES}
+            error={errors.play_styles}
           />
         </div>
 
@@ -678,7 +686,7 @@ export default function GameForm({ initial }: GameFormProps) {
         pitch={pitch}
         banner={banner}
         genres={selectedGenres}
-        playStyle={playStyle}
+        playStyles={(masterOptions?.play_styles ?? []).filter((p) => playStyleIds.includes(p.id))}
       />
 
       {submitError && (

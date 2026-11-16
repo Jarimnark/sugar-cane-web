@@ -40,6 +40,8 @@ export const PLAYERS_OPTIONS = PLAYER_COUNT_ORDER.map((value) => ({
 export const MAX_GENRES = 3;
 export const MIN_GENRES = 1;
 export const MIN_PLATFORMS = 1;
+export const MAX_PLAY_STYLES = 3;
+export const MIN_PLAY_STYLES = 1;
 
 export const MAX_SCREENSHOTS = 6;
 export const MAX_SCREENSHOT_BYTES = 2 * 1024 * 1024;

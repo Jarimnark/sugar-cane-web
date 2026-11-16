@@ -1,19 +1,18 @@
 "use client";
 
-import type { OptionItem, PlayStyleSlug } from "@/types/api";
-import { PLAY_STYLE_LABELS } from "@/lib/catalog";
+import type { OptionItem } from "@/types/api";
 
 interface PreviewCardProps {
   name: string;
   pitch: string;
   banner: string | null;
   genres: OptionItem[];
-  playStyle: PlayStyleSlug | "";
+  playStyles: OptionItem[];
 }
 
-export default function PreviewCard({ name, pitch, banner, genres, playStyle }: PreviewCardProps) {
+export default function PreviewCard({ name, pitch, banner, genres, playStyles }: PreviewCardProps) {
   const headlineGenre = genres[0]?.name;
-  const style = playStyle ? PLAY_STYLE_LABELS[playStyle] : "";
+  const style = playStyles.map((p) => p.name).join(" · ");
   const meta = [headlineGenre, style].filter(Boolean).join(" · ");
 
   return (

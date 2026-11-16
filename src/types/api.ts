@@ -32,8 +32,7 @@ export interface Game {
   link_ios?: string;
   bg?: string;
   banner?: string;
-  play_style?: PlayStyleSlug;
-  play_style_label?: string;
+  play_styles?: OptionItem[];
   players: string;
   tags: string[];
   genres?: OptionItem[];
@@ -109,7 +108,7 @@ export interface CreateGamePayload {
   link_ios?: string;
   bg?: string;
   banner?: string;
-  play_style?: PlayStyleSlug;
+  play_style_ids?: string[];
   players: string;
   tags?: string[];
   genre_ids?: string[];
