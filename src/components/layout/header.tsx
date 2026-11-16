@@ -189,6 +189,13 @@ export default function Header() {
                       <div className="text-xs text-muted truncate">{user.email}</div>
                     </div>
                     <Link
+                      href="/games/mine"
+                      onClick={() => setUserOpen(false)}
+                      className="block px-3 py-2.5 rounded-xl text-text text-nav font-semibold hover:bg-surface transition-colors"
+                    >
+                      My games
+                    </Link>
+                    <Link
                       href="/settings"
                       onClick={() => setUserOpen(false)}
                       className="block px-3 py-2.5 rounded-xl text-text text-nav font-semibold hover:bg-surface transition-colors"

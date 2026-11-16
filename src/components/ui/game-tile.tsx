@@ -72,8 +72,12 @@ export default function GameTile({ game }: GameTileProps) {
     >
       <div
         className="relative flex-[0_0_100%] group-hover:flex-[0_0_50%] transition-[flex-basis] duration-[280ms] ease-in-out overflow-hidden"
-        style={{ background: game.bg }}
+        style={game.banner ? undefined : { background: game.bg }}
       >
+        {game.banner && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={game.banner} alt="" className="absolute inset-0 w-full h-full object-cover" />
+        )}
         <div className="absolute -right-10 -bottom-15 size-55 rounded-full bg-black/10 pointer-events-none" />
 
         <div className="absolute inset-x-0 bottom-0 px-4 pb-4 pt-14 bg-gradient-to-t from-black/65 to-transparent">

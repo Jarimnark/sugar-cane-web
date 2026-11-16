@@ -61,17 +61,27 @@ export default function HeroCard({ game }: HeroCardProps) {
   }
 
   return (
-    <div className="relative rounded-3xl overflow-hidden min-h-110 flex flex-col justify-end p-8 sm:p-12 bg-[#F1ECFF]">
-      <div className="absolute -top-20 -right-20 size-96 rounded-full bg-[#E3DAFF] pointer-events-none" />
-      <div className="absolute top-8 right-8 size-64 rounded-full border-4 border-[#C9B8F5] pointer-events-none" />
-      <div className="absolute top-24 right-24 size-28 rounded-2xl rotate-12 bg-[#D6C9FB] pointer-events-none" />
+    <div className="relative rounded-3xl overflow-hidden min-h-110 flex flex-col justify-end p-8 sm:p-12 bg-[var(--color-hero-bg,#F7E3C9)]">
+      {game.banner ? (
+        <>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={game.banner} alt="" className="absolute inset-0 w-full h-full object-cover pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-black/25 to-transparent pointer-events-none" />
+        </>
+      ) : (
+        <>
+          <div className="absolute -top-20 -right-20 size-96 rounded-full bg-[var(--color-hero-circle,#F6D193)] pointer-events-none" />
+          <div className="absolute top-8 right-8 size-64 rounded-full border-4 border-[var(--color-hero-ring,#FAB87F)] pointer-events-none" />
+          <div className="absolute top-24 right-24 size-28 rounded-2xl rotate-12 bg-[var(--color-hero-square,#CD835C)] pointer-events-none" />
+        </>
+      )}
 
       <div className="relative flex flex-col gap-5 max-w-xl">
         <span className="inline-flex items-center self-start bg-accent text-text text-xs font-bold uppercase tracking-widest rounded-full px-3.5 py-1.5">
           {game.badge ?? "#1 Most popular this week"}
         </span>
 
-        <h1 className="font-display font-extrabold text-5xl sm:text-6xl lg:text-7xl leading-none tracking-[-0.03em] text-text">
+        <h1 className={`font-display font-extrabold text-5xl sm:text-6xl lg:text-7xl leading-none tracking-[-0.03em] ${game.banner ? "text-white" : "text-text"}`}>
           {game.name}
         </h1>
 
@@ -85,7 +95,7 @@ export default function HeroCard({ game }: HeroCardProps) {
           </div>
         )}
 
-        <p className="text-lg leading-snug max-w-lg text-[#4D4766]">{game.pitch}</p>
+        <p className={`text-lg leading-snug max-w-lg ${game.banner ? "text-white" : "text-[var(--color-hero-text,#433F34)]"}`}>{game.pitch}</p>
 
         <div className="flex flex-wrap items-center gap-3 mt-1">
           {playLinks.map((pl) => (

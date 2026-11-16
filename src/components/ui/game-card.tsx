@@ -79,7 +79,12 @@ export default function GameCard({ game, variant = "default", showSave }: GameCa
         tabIndex={-1}
         aria-hidden
       >
-        <div className="w-full h-full" style={{ backgroundColor: game.bg }} />
+        {game.banner ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={game.banner} alt="" className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full" style={{ backgroundColor: game.bg }} />
+        )}
       </Link>
 
       {showSaveButton && (
